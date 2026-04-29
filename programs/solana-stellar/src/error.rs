@@ -38,6 +38,8 @@ pub enum StellarError {
     ReleaseNotFinalized,
     #[msg("Invalid contributor share basis points.")]
     InvalidShareBps,
+    #[msg("Invalid release distribution model for this operation.")]
+    InvalidDistributionModel,
     #[msg("Invalid revenue amount.")]
     InvalidRevenueAmount,
     #[msg("No revenue available to claim.")]

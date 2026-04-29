@@ -88,6 +88,10 @@ pub fn add_release_share(ctx: Context<AddReleaseShare>, bps: u16) -> Result<()> 
         release.status == ReleaseStatus::Draft,
         StellarError::ReleaseLocked
     );
+    require!(
+        release.distribution_model != CollaborationPolicy::LineageEqual,
+        StellarError::InvalidDistributionModel
+    );
 
     let new_total = release
         .total_share_bps
@@ -122,6 +126,10 @@ pub fn finalize_release(ctx: Context<FinalizeRelease>) -> Result<()> {
     require!(
         release.status == ReleaseStatus::Draft,
         StellarError::ReleaseLocked
+    );
+    require!(
+        release.distribution_model != CollaborationPolicy::LineageEqual,
+        StellarError::InvalidDistributionModel
     );
     require!(
         release.total_share_bps == BPS_DENOMINATOR,
@@ -162,6 +170,11 @@ pub fn finalize_lineage_equal_release<'info>(
         release.status == ReleaseStatus::Draft,
         StellarError::ReleaseLocked
     );
+    require!(
+        release.distribution_model == CollaborationPolicy::LineageEqual,
+        StellarError::InvalidDistributionModel
+    );
+    require!(release.total_share_bps == 0, StellarError::InvalidShareBps);
     require!(
         asset.status == AssetStatus::Approved,
         StellarError::InvalidAssetStatus

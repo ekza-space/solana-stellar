@@ -278,6 +278,8 @@ describe("solana-stellar", () => {
     const finalAnimationLink = linkPda(finalAsset, animationAsset);
     const release = releasePda(universe, 0);
     const vault = vaultPda(release);
+    const rogueContributor = anchor.web3.Keypair.generate();
+    const rogueShare = sharePda(release, rogueContributor.publicKey);
 
     await program.methods
       .createUniverse(
@@ -454,6 +456,23 @@ describe("solana-stellar", () => {
         systemProgram: anchor.web3.SystemProgram.programId,
       })
       .rpc();
+
+    try {
+      await program.methods
+        .addReleaseShare(1000)
+        .accountsStrict({
+          universe,
+          release,
+          share: rogueShare,
+          contributor: rogueContributor.publicKey,
+          owner: owner.publicKey,
+          systemProgram: anchor.web3.SystemProgram.programId,
+        })
+        .rpc();
+      expect.fail("should reject manual shares on lineage-equal releases");
+    } catch (e: any) {
+      expect(e.message).to.include("InvalidDistributionModel");
+    }
 
     const contributors = [
       owner.publicKey,
