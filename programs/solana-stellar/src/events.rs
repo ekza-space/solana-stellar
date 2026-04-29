@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
 
-use crate::state::{AssetStatus, ReleaseStatus};
+use crate::state::{AssetStatus, CollaborationPolicy, ReleaseStatus};
 
 #[event]
 pub struct UniverseCreated {
@@ -49,6 +49,13 @@ pub struct ReleaseShareAdded {
     pub release: Pubkey,
     pub contributor: Pubkey,
     pub bps: u16,
+}
+
+#[event]
+pub struct ReleaseDistributionModelSet {
+    pub release: Pubkey,
+    pub distribution_model: CollaborationPolicy,
+    pub contributor_count: u16,
 }
 
 #[event]

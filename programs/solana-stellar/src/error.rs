@@ -28,6 +28,10 @@ pub enum StellarError {
     ReleaseMismatch,
     #[msg("Invalid lineage link.")]
     InvalidLineageLink,
+    #[msg("Invalid lineage proof.")]
+    InvalidLineageProof,
+    #[msg("Invalid contributor count.")]
+    InvalidContributorCount,
     #[msg("Release is locked for this operation.")]
     ReleaseLocked,
     #[msg("Release is not finalized.")]

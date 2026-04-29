@@ -63,6 +63,7 @@ pub struct Release {
     pub index: u64,
     pub authority: Pubkey,
     pub status: ReleaseStatus,
+    pub distribution_model: CollaborationPolicy,
     pub metadata_hash: String,
     pub total_share_bps: u16,
     pub total_deposited_lamports: u64,
@@ -74,7 +75,7 @@ pub struct Release {
 
 impl Release {
     pub const INIT_SPACE: usize =
-        32 + 32 + 32 + 8 + 32 + 1 + (4 + MAX_HASH_LEN) + 2 + 8 + 1 + 8 + 8 + 32;
+        32 + 32 + 32 + 8 + 32 + 1 + 1 + (4 + MAX_HASH_LEN) + 2 + 8 + 1 + 8 + 8 + 32;
 
     pub fn accepts_revenue(&self) -> bool {
         self.status == ReleaseStatus::Finalized || self.status == ReleaseStatus::Linked
@@ -113,6 +114,7 @@ pub enum UniverseStatus {
 #[derive(AnchorSerialize, AnchorDeserialize, Clone, Copy, PartialEq, Eq)]
 pub enum CollaborationPolicy {
     Equal,
+    LineageEqual,
     Weighted,
     Custom,
 }

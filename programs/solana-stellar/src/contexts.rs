@@ -228,6 +228,23 @@ pub struct FinalizeRelease<'info> {
 }
 
 #[derive(Accounts)]
+pub struct FinalizeLineageEqualRelease<'info> {
+    #[account(has_one = owner @ StellarError::Unauthorized)]
+    pub universe: Account<'info, Universe>,
+    #[account(
+        mut,
+        constraint = release.universe == universe.key() @ StellarError::UniverseMismatch,
+        constraint = release.asset == asset.key() @ StellarError::AssetMismatch
+    )]
+    pub release: Account<'info, Release>,
+    #[account(mut)]
+    pub asset: Account<'info, Asset>,
+    #[account(mut)]
+    pub owner: Signer<'info>,
+    pub system_program: Program<'info, System>,
+}
+
+#[derive(Accounts)]
 pub struct LinkAvatarData<'info> {
     #[account(has_one = owner @ StellarError::Unauthorized)]
     pub universe: Account<'info, Universe>,

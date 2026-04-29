@@ -104,6 +104,14 @@ pub mod solana_stellar {
         handlers::finalize_release(ctx)
     }
 
+    pub fn finalize_lineage_equal_release<'info>(
+        ctx: Context<'_, '_, 'info, 'info, FinalizeLineageEqualRelease<'info>>,
+        asset_count: u16,
+        link_count: u16,
+    ) -> Result<()> {
+        handlers::finalize_lineage_equal_release(ctx, asset_count, link_count)
+    }
+
     pub fn link_avatar_data(ctx: Context<LinkAvatarData>, avatar_data: Pubkey) -> Result<()> {
         handlers::link_avatar_data(ctx, avatar_data)
     }
