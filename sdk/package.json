@@ -1,0 +1,52 @@
+{
+  "name": "solana-stellar-sdk",
+  "version": "0.1.0",
+  "license": "ISC",
+  "main": "dist/src/index.js",
+  "types": "dist/src/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "require": "./dist/src/index.js",
+      "default": "./dist/src/index.js"
+    },
+    "./client": {
+      "types": "./dist/src/client.d.ts",
+      "require": "./dist/src/client.js",
+      "default": "./dist/src/client.js"
+    },
+    "./filters": {
+      "types": "./dist/src/filters.d.ts",
+      "require": "./dist/src/filters.js",
+      "default": "./dist/src/filters.js"
+    },
+    "./instructions": {
+      "types": "./dist/src/instructions.d.ts",
+      "require": "./dist/src/instructions.js",
+      "default": "./dist/src/instructions.js"
+    },
+    "./pda": {
+      "types": "./dist/src/pda.d.ts",
+      "require": "./dist/src/pda.js",
+      "default": "./dist/src/pda.js"
+    },
+    "./utils": {
+      "types": "./dist/src/utils.d.ts",
+      "require": "./dist/src/utils.js",
+      "default": "./dist/src/utils.js"
+    }
+  },
+  "scripts": {
+    "build": "node -e \"process.argv.push('-b'); require('typescript/lib/tsc')\""
+  },
+  "files": [
+    "dist"
+  ],
+  "dependencies": {
+    "@coral-xyz/anchor": "^0.32.1",
+    "@solana/web3.js": "^1.98.4"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.3"
+  }
+}

@@ -34,6 +34,7 @@ export function AssetsPage() {
           new anchor.BN(Number(assetIndex || "0")),
           enumValue(kind) as any,
           enumValue(subtype) as any,
+          enumValue("unknown") as any,
           metadataHash,
           previewHash,
         )

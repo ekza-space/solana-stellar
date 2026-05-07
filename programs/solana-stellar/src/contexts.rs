@@ -1,14 +1,28 @@
 use anchor_lang::prelude::*;
 
 use crate::{
-    constants::{ASSET_SEED, LINK_SEED, RELEASE_SEED, SHARE_SEED, UNIVERSE_SEED, VAULT_SEED},
+    constants::{
+        ASSET_SEED, LINK_SEED, REGISTRY_SEED, RELEASE_SEED, SHARE_SEED, UNIVERSE_INDEX_SEED,
+        UNIVERSE_SEED, VAULT_SEED,
+    },
     error::StellarError,
-    state::{Asset, AssetParent, AssetStatus, ContributorShare, Release, ReleaseVault, Universe},
+    state::{
+        Asset, AssetParent, AssetStatus, ContributorShare, Registry, Release, ReleaseVault,
+        Universe, UniverseIndex,
+    },
 };
 
 #[derive(Accounts)]
 #[instruction(universe_index: u64)]
 pub struct CreateUniverse<'info> {
+    #[account(
+        init_if_needed,
+        payer = owner,
+        space = 8 + Registry::INIT_SPACE,
+        seeds = [REGISTRY_SEED],
+        bump
+    )]
+    pub registry: Account<'info, Registry>,
     #[account(
         init,
         payer = owner,
@@ -21,6 +35,17 @@ pub struct CreateUniverse<'info> {
         bump
     )]
     pub universe: Account<'info, Universe>,
+    #[account(
+        init,
+        payer = owner,
+        space = 8 + UniverseIndex::INIT_SPACE,
+        seeds = [
+            UNIVERSE_INDEX_SEED,
+            &registry.universe_count.to_le_bytes()
+        ],
+        bump
+    )]
+    pub universe_lookup: Account<'info, UniverseIndex>,
     #[account(mut)]
     pub owner: Signer<'info>,
     pub system_program: Program<'info, System>,

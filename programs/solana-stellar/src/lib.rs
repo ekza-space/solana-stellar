@@ -54,18 +54,28 @@ pub mod solana_stellar {
         asset_index: u64,
         kind: AssetKind,
         subtype: AssetSubtype,
+        license_kind: LicenseKind,
         metadata_hash: String,
         preview_hash: String,
     ) -> Result<()> {
-        handlers::create_asset(ctx, asset_index, kind, subtype, metadata_hash, preview_hash)
+        handlers::create_asset(
+            ctx,
+            asset_index,
+            kind,
+            subtype,
+            license_kind,
+            metadata_hash,
+            preview_hash,
+        )
     }
 
     pub fn update_asset_metadata(
         ctx: Context<UpdateAssetMetadata>,
+        license_kind: LicenseKind,
         metadata_hash: String,
         preview_hash: String,
     ) -> Result<()> {
-        handlers::update_asset_metadata(ctx, metadata_hash, preview_hash)
+        handlers::update_asset_metadata(ctx, license_kind, metadata_hash, preview_hash)
     }
 
     pub fn add_asset_parent(ctx: Context<AddAssetParent>) -> Result<()> {

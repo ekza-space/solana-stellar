@@ -44,5 +44,29 @@ this protocol.
 ## Development
 
 ```sh
+yarn --cwd sdk build
 anchor test
 ```
+
+Localnet universe seeding:
+
+```sh
+make metadata-server
+make seed-new-single-localnet
+```
+
+`seed-new-single-localnet` creates a fresh universe and guarantees at least one
+top-level project plus one child 3D model asset inside it. Seeding uses `.glb`
+files by default so each model is a single portable artifact with embedded
+textures. Use
+`make seed-new-everything-localnet MODEL_COUNT=10` for a fresh universe with
+more model-backed projects, or `make seed-everything-localnet MODEL_COUNT=10`
+to append to the current manifest universe. For local OBJ loader diagnostics
+only, pass `MODEL_FORMAT=obj` or `MODEL_FORMAT=all`.
+
+## TypeScript SDK
+
+The local `solana-stellar-sdk` package in `sdk/` is the frontend-facing source
+of truth for the Solana Stellar IDL, typed Anchor client, PDA helpers, account
+filters, and low-level instruction helpers. Downstream apps can consume it with
+a local file dependency such as `file:../solana-stellar/sdk`.

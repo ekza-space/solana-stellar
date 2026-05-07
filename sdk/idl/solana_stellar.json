@@ -1,0 +1,1664 @@
+{
+  "address": "3rVXfq7LLSLqbDzvZuSrQoMytwczLj2Q8Hue62rxPZAA",
+  "metadata": {
+    "name": "solana_stellar",
+    "version": "0.1.0",
+    "spec": "0.1.0",
+    "description": "Created with Anchor"
+  },
+  "instructions": [
+    {
+      "name": "add_asset_parent",
+      "discriminator": [104, 56, 24, 76, 97, 101, 94, 143],
+      "accounts": [
+        {
+          "name": "child_asset",
+          "writable": true
+        },
+        {
+          "name": "parent_asset"
+        },
+        {
+          "name": "creator",
+          "writable": true,
+          "signer": true,
+          "relations": ["child_asset"]
+        },
+        {
+          "name": "asset_parent",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [108, 105, 110, 107]
+              },
+              {
+                "kind": "account",
+                "path": "child_asset"
+              },
+              {
+                "kind": "account",
+                "path": "parent_asset"
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "add_release_share",
+      "discriminator": [130, 134, 41, 170, 213, 143, 97, 137],
+      "accounts": [
+        {
+          "name": "universe"
+        },
+        {
+          "name": "release",
+          "writable": true
+        },
+        {
+          "name": "share",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [115, 104, 97, 114, 101]
+              },
+              {
+                "kind": "account",
+                "path": "release"
+              },
+              {
+                "kind": "account",
+                "path": "contributor"
+              }
+            ]
+          }
+        },
+        {
+          "name": "contributor"
+        },
+        {
+          "name": "owner",
+          "writable": true,
+          "signer": true,
+          "relations": ["universe"]
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "bps",
+          "type": "u16"
+        }
+      ]
+    },
+    {
+      "name": "approve_asset",
+      "discriminator": [127, 15, 21, 247, 23, 22, 189, 238],
+      "accounts": [
+        {
+          "name": "universe"
+        },
+        {
+          "name": "asset",
+          "writable": true
+        },
+        {
+          "name": "owner",
+          "signer": true,
+          "relations": ["universe"]
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "claim_revenue",
+      "discriminator": [4, 22, 151, 70, 183, 79, 73, 189],
+      "accounts": [
+        {
+          "name": "release"
+        },
+        {
+          "name": "vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114, 101, 108, 101, 97, 115, 101, 95, 118, 97, 117, 108, 116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "release"
+              }
+            ]
+          }
+        },
+        {
+          "name": "share",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [115, 104, 97, 114, 101]
+              },
+              {
+                "kind": "account",
+                "path": "release"
+              },
+              {
+                "kind": "account",
+                "path": "contributor"
+              }
+            ]
+          }
+        },
+        {
+          "name": "contributor",
+          "writable": true,
+          "signer": true
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "close_asset",
+      "discriminator": [39, 124, 90, 146, 16, 82, 77, 253],
+      "accounts": [
+        {
+          "name": "universe"
+        },
+        {
+          "name": "asset",
+          "writable": true
+        },
+        {
+          "name": "authority",
+          "signer": true
+        },
+        {
+          "name": "rent_receiver",
+          "writable": true
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "close_universe",
+      "discriminator": [44, 6, 172, 166, 141, 160, 154, 4],
+      "accounts": [
+        {
+          "name": "universe",
+          "writable": true
+        },
+        {
+          "name": "owner",
+          "writable": true,
+          "signer": true,
+          "relations": ["universe"]
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "create_asset",
+      "discriminator": [28, 42, 120, 51, 7, 38, 156, 136],
+      "accounts": [
+        {
+          "name": "universe",
+          "writable": true
+        },
+        {
+          "name": "asset",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [97, 115, 115, 101, 116]
+              },
+              {
+                "kind": "account",
+                "path": "universe"
+              },
+              {
+                "kind": "arg",
+                "path": "asset_index"
+              }
+            ]
+          }
+        },
+        {
+          "name": "creator",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "asset_index",
+          "type": "u64"
+        },
+        {
+          "name": "kind",
+          "type": {
+            "defined": {
+              "name": "AssetKind"
+            }
+          }
+        },
+        {
+          "name": "subtype",
+          "type": {
+            "defined": {
+              "name": "AssetSubtype"
+            }
+          }
+        },
+        {
+          "name": "license_kind",
+          "type": {
+            "defined": {
+              "name": "LicenseKind"
+            }
+          }
+        },
+        {
+          "name": "metadata_hash",
+          "type": "string"
+        },
+        {
+          "name": "preview_hash",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "create_release",
+      "discriminator": [76, 2, 12, 43, 107, 154, 171, 200],
+      "accounts": [
+        {
+          "name": "universe",
+          "writable": true
+        },
+        {
+          "name": "asset"
+        },
+        {
+          "name": "release",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [114, 101, 108, 101, 97, 115, 101]
+              },
+              {
+                "kind": "account",
+                "path": "universe"
+              },
+              {
+                "kind": "arg",
+                "path": "release_index"
+              }
+            ]
+          }
+        },
+        {
+          "name": "vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114, 101, 108, 101, 97, 115, 101, 95, 118, 97, 117, 108, 116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "release"
+              }
+            ]
+          }
+        },
+        {
+          "name": "owner",
+          "writable": true,
+          "signer": true,
+          "relations": ["universe"]
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "release_index",
+          "type": "u64"
+        },
+        {
+          "name": "metadata_hash",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "create_universe",
+      "discriminator": [68, 252, 105, 236, 109, 225, 120, 113],
+      "accounts": [
+        {
+          "name": "registry",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [114, 101, 103, 105, 115, 116, 114, 121]
+              }
+            ]
+          }
+        },
+        {
+          "name": "universe",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [117, 110, 105, 118, 101, 114, 115, 101]
+              },
+              {
+                "kind": "account",
+                "path": "owner"
+              },
+              {
+                "kind": "arg",
+                "path": "universe_index"
+              }
+            ]
+          }
+        },
+        {
+          "name": "universe_lookup",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  117, 110, 105, 118, 101, 114, 115, 101, 95, 105, 110, 100,
+                  101, 120
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "registry.universe_count",
+                "account": "Registry"
+              }
+            ]
+          }
+        },
+        {
+          "name": "owner",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "universe_index",
+          "type": "u64"
+        },
+        {
+          "name": "metadata_hash",
+          "type": "string"
+        },
+        {
+          "name": "project_type",
+          "type": {
+            "defined": {
+              "name": "AssetKind"
+            }
+          }
+        },
+        {
+          "name": "collaboration_policy",
+          "type": {
+            "defined": {
+              "name": "CollaborationPolicy"
+            }
+          }
+        },
+        {
+          "name": "open",
+          "type": "bool"
+        }
+      ]
+    },
+    {
+      "name": "deposit_revenue",
+      "discriminator": [224, 212, 82, 100, 60, 240, 220, 29],
+      "accounts": [
+        {
+          "name": "release",
+          "writable": true
+        },
+        {
+          "name": "vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114, 101, 108, 101, 97, 115, 101, 95, 118, 97, 117, 108, 116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "release"
+              }
+            ]
+          }
+        },
+        {
+          "name": "payer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "amount",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "finalize_lineage_equal_release",
+      "discriminator": [62, 145, 16, 168, 240, 50, 4, 42],
+      "accounts": [
+        {
+          "name": "universe"
+        },
+        {
+          "name": "release",
+          "writable": true
+        },
+        {
+          "name": "asset",
+          "writable": true
+        },
+        {
+          "name": "owner",
+          "writable": true,
+          "signer": true,
+          "relations": ["universe"]
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "asset_count",
+          "type": "u16"
+        },
+        {
+          "name": "link_count",
+          "type": "u16"
+        }
+      ]
+    },
+    {
+      "name": "finalize_release",
+      "discriminator": [133, 95, 4, 17, 103, 213, 141, 58],
+      "accounts": [
+        {
+          "name": "universe"
+        },
+        {
+          "name": "release",
+          "writable": true
+        },
+        {
+          "name": "asset",
+          "writable": true
+        },
+        {
+          "name": "owner",
+          "signer": true,
+          "relations": ["universe"]
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "link_avatar_data",
+      "discriminator": [100, 18, 17, 99, 22, 120, 141, 252],
+      "accounts": [
+        {
+          "name": "universe"
+        },
+        {
+          "name": "release",
+          "writable": true
+        },
+        {
+          "name": "owner",
+          "signer": true,
+          "relations": ["universe"]
+        }
+      ],
+      "args": [
+        {
+          "name": "avatar_data",
+          "type": "pubkey"
+        }
+      ]
+    },
+    {
+      "name": "reject_asset",
+      "discriminator": [79, 96, 89, 56, 10, 45, 227, 217],
+      "accounts": [
+        {
+          "name": "universe"
+        },
+        {
+          "name": "asset",
+          "writable": true
+        },
+        {
+          "name": "owner",
+          "signer": true,
+          "relations": ["universe"]
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "submit_asset",
+      "discriminator": [4, 23, 13, 111, 93, 172, 183, 91],
+      "accounts": [
+        {
+          "name": "asset",
+          "writable": true
+        },
+        {
+          "name": "creator",
+          "signer": true,
+          "relations": ["asset"]
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "update_asset_metadata",
+      "discriminator": [217, 98, 205, 153, 242, 4, 41, 76],
+      "accounts": [
+        {
+          "name": "asset",
+          "writable": true
+        },
+        {
+          "name": "creator",
+          "signer": true,
+          "relations": ["asset"]
+        }
+      ],
+      "args": [
+        {
+          "name": "license_kind",
+          "type": {
+            "defined": {
+              "name": "LicenseKind"
+            }
+          }
+        },
+        {
+          "name": "metadata_hash",
+          "type": "string"
+        },
+        {
+          "name": "preview_hash",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "update_universe",
+      "discriminator": [157, 157, 54, 180, 142, 174, 246, 121],
+      "accounts": [
+        {
+          "name": "universe",
+          "writable": true
+        },
+        {
+          "name": "owner",
+          "signer": true,
+          "relations": ["universe"]
+        }
+      ],
+      "args": [
+        {
+          "name": "metadata_hash",
+          "type": "string"
+        },
+        {
+          "name": "open",
+          "type": "bool"
+        },
+        {
+          "name": "collaboration_policy",
+          "type": {
+            "defined": {
+              "name": "CollaborationPolicy"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "accounts": [
+    {
+      "name": "Asset",
+      "discriminator": [234, 180, 241, 252, 139, 224, 160, 8]
+    },
+    {
+      "name": "AssetParent",
+      "discriminator": [247, 168, 159, 50, 150, 61, 235, 227]
+    },
+    {
+      "name": "ContributorShare",
+      "discriminator": [146, 88, 198, 243, 240, 238, 221, 182]
+    },
+    {
+      "name": "Registry",
+      "discriminator": [47, 174, 110, 246, 184, 182, 252, 218]
+    },
+    {
+      "name": "Release",
+      "discriminator": [229, 49, 96, 148, 167, 188, 17, 49]
+    },
+    {
+      "name": "ReleaseVault",
+      "discriminator": [33, 38, 51, 77, 217, 179, 1, 5]
+    },
+    {
+      "name": "Universe",
+      "discriminator": [86, 112, 227, 226, 88, 47, 242, 113]
+    },
+    {
+      "name": "UniverseIndex",
+      "discriminator": [160, 143, 49, 208, 138, 104, 75, 45]
+    }
+  ],
+  "events": [
+    {
+      "name": "AssetCreated",
+      "discriminator": [206, 193, 252, 254, 207, 185, 154, 4]
+    },
+    {
+      "name": "AssetParentAdded",
+      "discriminator": [194, 97, 145, 92, 28, 207, 67, 68]
+    },
+    {
+      "name": "AssetStatusChanged",
+      "discriminator": [50, 89, 231, 242, 218, 23, 131, 216]
+    },
+    {
+      "name": "AvatarDataLinked",
+      "discriminator": [189, 148, 22, 111, 17, 129, 142, 202]
+    },
+    {
+      "name": "ReleaseCreated",
+      "discriminator": [86, 95, 64, 109, 171, 247, 137, 65]
+    },
+    {
+      "name": "ReleaseDistributionModelSet",
+      "discriminator": [211, 71, 130, 3, 8, 110, 114, 3]
+    },
+    {
+      "name": "ReleaseShareAdded",
+      "discriminator": [189, 43, 189, 229, 54, 190, 30, 239]
+    },
+    {
+      "name": "ReleaseStatusChanged",
+      "discriminator": [116, 240, 44, 172, 164, 80, 0, 127]
+    },
+    {
+      "name": "RevenueClaimed",
+      "discriminator": [5, 254, 104, 87, 133, 137, 45, 116]
+    },
+    {
+      "name": "RevenueDeposited",
+      "discriminator": [97, 189, 62, 159, 189, 208, 43, 181]
+    },
+    {
+      "name": "UniverseCreated",
+      "discriminator": [244, 82, 63, 148, 26, 10, 53, 67]
+    },
+    {
+      "name": "UniverseUpdated",
+      "discriminator": [111, 110, 186, 3, 147, 5, 33, 73]
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "Unauthorized",
+      "msg": "Unauthorized action."
+    },
+    {
+      "code": 6001,
+      "name": "UniverseClosed",
+      "msg": "Universe is closed to public collaboration."
+    },
+    {
+      "code": 6002,
+      "name": "UniverseNotActive",
+      "msg": "Universe is not active."
+    },
+    {
+      "code": 6003,
+      "name": "UniverseNotEmpty",
+      "msg": "Universe still has live assets or releases."
+    },
+    {
+      "code": 6004,
+      "name": "InvalidHash",
+      "msg": "Invalid metadata or content hash."
+    },
+    {
+      "code": 6005,
+      "name": "InvalidAssetIndex",
+      "msg": "Invalid asset index."
+    },
+    {
+      "code": 6006,
+      "name": "InvalidReleaseIndex",
+      "msg": "Invalid release index."
+    },
+    {
+      "code": 6007,
+      "name": "AssetLocked",
+      "msg": "Asset is locked for this operation."
+    },
+    {
+      "code": 6008,
+      "name": "InvalidAssetStatus",
+      "msg": "Invalid asset status for this operation."
+    },
+    {
+      "code": 6009,
+      "name": "UniverseMismatch",
+      "msg": "Universe mismatch."
+    },
+    {
+      "code": 6010,
+      "name": "AssetMismatch",
+      "msg": "Asset mismatch."
+    },
+    {
+      "code": 6011,
+      "name": "ReleaseMismatch",
+      "msg": "Release mismatch."
+    },
+    {
+      "code": 6012,
+      "name": "InvalidLineageLink",
+      "msg": "Invalid lineage link."
+    },
+    {
+      "code": 6013,
+      "name": "InvalidLineageProof",
+      "msg": "Invalid lineage proof."
+    },
+    {
+      "code": 6014,
+      "name": "InvalidContributorCount",
+      "msg": "Invalid contributor count."
+    },
+    {
+      "code": 6015,
+      "name": "ReleaseLocked",
+      "msg": "Release is locked for this operation."
+    },
+    {
+      "code": 6016,
+      "name": "ReleaseNotFinalized",
+      "msg": "Release is not finalized."
+    },
+    {
+      "code": 6017,
+      "name": "InvalidShareBps",
+      "msg": "Invalid contributor share basis points."
+    },
+    {
+      "code": 6018,
+      "name": "InvalidDistributionModel",
+      "msg": "Invalid release distribution model for this operation."
+    },
+    {
+      "code": 6019,
+      "name": "InvalidRevenueAmount",
+      "msg": "Invalid revenue amount."
+    },
+    {
+      "code": 6020,
+      "name": "NoRevenueToClaim",
+      "msg": "No revenue available to claim."
+    },
+    {
+      "code": 6021,
+      "name": "InsufficientVaultBalance",
+      "msg": "Release vault balance is insufficient."
+    },
+    {
+      "code": 6022,
+      "name": "NumericalOverflow",
+      "msg": "Numerical overflow occurred."
+    }
+  ],
+  "types": [
+    {
+      "name": "Asset",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "universe",
+            "type": "pubkey"
+          },
+          {
+            "name": "index",
+            "type": "u64"
+          },
+          {
+            "name": "creator",
+            "type": "pubkey"
+          },
+          {
+            "name": "rent_payer",
+            "type": "pubkey"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "kind",
+            "type": {
+              "defined": {
+                "name": "AssetKind"
+              }
+            }
+          },
+          {
+            "name": "subtype",
+            "type": {
+              "defined": {
+                "name": "AssetSubtype"
+              }
+            }
+          },
+          {
+            "name": "license_kind",
+            "type": {
+              "defined": {
+                "name": "LicenseKind"
+              }
+            }
+          },
+          {
+            "name": "status",
+            "type": {
+              "defined": {
+                "name": "AssetStatus"
+              }
+            }
+          },
+          {
+            "name": "metadata_hash",
+            "type": "string"
+          },
+          {
+            "name": "preview_hash",
+            "type": "string"
+          },
+          {
+            "name": "created_at",
+            "type": "i64"
+          },
+          {
+            "name": "updated_at",
+            "type": "i64"
+          },
+          {
+            "name": "parent_count",
+            "type": "u16"
+          }
+        ]
+      }
+    },
+    {
+      "name": "AssetCreated",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "universe",
+            "type": "pubkey"
+          },
+          {
+            "name": "asset",
+            "type": "pubkey"
+          },
+          {
+            "name": "creator",
+            "type": "pubkey"
+          },
+          {
+            "name": "index",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "AssetKind",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Image"
+          },
+          {
+            "name": "Model3d"
+          },
+          {
+            "name": "Animation"
+          },
+          {
+            "name": "Audio"
+          },
+          {
+            "name": "Script"
+          },
+          {
+            "name": "Metadata"
+          },
+          {
+            "name": "Other"
+          }
+        ]
+      }
+    },
+    {
+      "name": "AssetParent",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "child_asset",
+            "type": "pubkey"
+          },
+          {
+            "name": "parent_asset",
+            "type": "pubkey"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "AssetParentAdded",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "child_asset",
+            "type": "pubkey"
+          },
+          {
+            "name": "parent_asset",
+            "type": "pubkey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "AssetStatus",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Draft"
+          },
+          {
+            "name": "Submitted"
+          },
+          {
+            "name": "Approved"
+          },
+          {
+            "name": "Rejected"
+          },
+          {
+            "name": "Finalized"
+          },
+          {
+            "name": "Minted"
+          },
+          {
+            "name": "Archived"
+          }
+        ]
+      }
+    },
+    {
+      "name": "AssetStatusChanged",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "asset",
+            "type": "pubkey"
+          },
+          {
+            "name": "status",
+            "type": {
+              "defined": {
+                "name": "AssetStatus"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "AssetSubtype",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Concept"
+          },
+          {
+            "name": "Sketch"
+          },
+          {
+            "name": "Texture"
+          },
+          {
+            "name": "Mesh"
+          },
+          {
+            "name": "Rig"
+          },
+          {
+            "name": "Motion"
+          },
+          {
+            "name": "Preview"
+          },
+          {
+            "name": "Final"
+          },
+          {
+            "name": "Other"
+          }
+        ]
+      }
+    },
+    {
+      "name": "AvatarDataLinked",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "release",
+            "type": "pubkey"
+          },
+          {
+            "name": "avatar_data",
+            "type": "pubkey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "CollaborationPolicy",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Equal"
+          },
+          {
+            "name": "LineageEqual"
+          },
+          {
+            "name": "Weighted"
+          },
+          {
+            "name": "Custom"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ContributorShare",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "release",
+            "type": "pubkey"
+          },
+          {
+            "name": "contributor",
+            "type": "pubkey"
+          },
+          {
+            "name": "bps",
+            "type": "u16"
+          },
+          {
+            "name": "claimed_lamports",
+            "type": "u64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "LicenseKind",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Unknown"
+          },
+          {
+            "name": "AllRightsReserved"
+          },
+          {
+            "name": "Cc0"
+          },
+          {
+            "name": "CcBy4"
+          },
+          {
+            "name": "CcBySa4"
+          },
+          {
+            "name": "CcByNc4"
+          },
+          {
+            "name": "CcByNcSa4"
+          },
+          {
+            "name": "Mit"
+          },
+          {
+            "name": "Custom"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Registry",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "universe_count",
+            "type": "u64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Release",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "universe",
+            "type": "pubkey"
+          },
+          {
+            "name": "asset",
+            "type": "pubkey"
+          },
+          {
+            "name": "vault",
+            "type": "pubkey"
+          },
+          {
+            "name": "index",
+            "type": "u64"
+          },
+          {
+            "name": "authority",
+            "type": "pubkey"
+          },
+          {
+            "name": "status",
+            "type": {
+              "defined": {
+                "name": "ReleaseStatus"
+              }
+            }
+          },
+          {
+            "name": "distribution_model",
+            "type": {
+              "defined": {
+                "name": "CollaborationPolicy"
+              }
+            }
+          },
+          {
+            "name": "metadata_hash",
+            "type": "string"
+          },
+          {
+            "name": "total_share_bps",
+            "type": "u16"
+          },
+          {
+            "name": "total_deposited_lamports",
+            "type": "u64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "created_at",
+            "type": "i64"
+          },
+          {
+            "name": "finalized_at",
+            "type": "i64"
+          },
+          {
+            "name": "linked_avatar_data",
+            "type": "pubkey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ReleaseCreated",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "universe",
+            "type": "pubkey"
+          },
+          {
+            "name": "release",
+            "type": "pubkey"
+          },
+          {
+            "name": "asset",
+            "type": "pubkey"
+          },
+          {
+            "name": "vault",
+            "type": "pubkey"
+          },
+          {
+            "name": "index",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ReleaseDistributionModelSet",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "release",
+            "type": "pubkey"
+          },
+          {
+            "name": "distribution_model",
+            "type": {
+              "defined": {
+                "name": "CollaborationPolicy"
+              }
+            }
+          },
+          {
+            "name": "contributor_count",
+            "type": "u16"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ReleaseShareAdded",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "release",
+            "type": "pubkey"
+          },
+          {
+            "name": "contributor",
+            "type": "pubkey"
+          },
+          {
+            "name": "bps",
+            "type": "u16"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ReleaseStatus",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Draft"
+          },
+          {
+            "name": "Finalized"
+          },
+          {
+            "name": "Linked"
+          },
+          {
+            "name": "Archived"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ReleaseStatusChanged",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "release",
+            "type": "pubkey"
+          },
+          {
+            "name": "status",
+            "type": {
+              "defined": {
+                "name": "ReleaseStatus"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "ReleaseVault",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "release",
+            "type": "pubkey"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "RevenueClaimed",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "release",
+            "type": "pubkey"
+          },
+          {
+            "name": "contributor",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "total_claimed",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "RevenueDeposited",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "release",
+            "type": "pubkey"
+          },
+          {
+            "name": "vault",
+            "type": "pubkey"
+          },
+          {
+            "name": "payer",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Universe",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "owner",
+            "type": "pubkey"
+          },
+          {
+            "name": "index",
+            "type": "u64"
+          },
+          {
+            "name": "global_index",
+            "type": "u64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "asset_count",
+            "type": "u64"
+          },
+          {
+            "name": "release_count",
+            "type": "u64"
+          },
+          {
+            "name": "open",
+            "type": "bool"
+          },
+          {
+            "name": "status",
+            "type": {
+              "defined": {
+                "name": "UniverseStatus"
+              }
+            }
+          },
+          {
+            "name": "project_type",
+            "type": {
+              "defined": {
+                "name": "AssetKind"
+              }
+            }
+          },
+          {
+            "name": "collaboration_policy",
+            "type": {
+              "defined": {
+                "name": "CollaborationPolicy"
+              }
+            }
+          },
+          {
+            "name": "metadata_hash",
+            "type": "string"
+          },
+          {
+            "name": "created_at",
+            "type": "i64"
+          },
+          {
+            "name": "updated_at",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "UniverseCreated",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "universe",
+            "type": "pubkey"
+          },
+          {
+            "name": "owner",
+            "type": "pubkey"
+          },
+          {
+            "name": "index",
+            "type": "u64"
+          },
+          {
+            "name": "global_index",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "UniverseIndex",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "global_index",
+            "type": "u64"
+          },
+          {
+            "name": "universe",
+            "type": "pubkey"
+          },
+          {
+            "name": "owner",
+            "type": "pubkey"
+          },
+          {
+            "name": "owner_index",
+            "type": "u64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "UniverseStatus",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Active"
+          },
+          {
+            "name": "Closed"
+          }
+        ]
+      }
+    },
+    {
+      "name": "UniverseUpdated",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "universe",
+            "type": "pubkey"
+          },
+          {
+            "name": "open",
+            "type": "bool"
+          }
+        ]
+      }
+    }
+  ]
+}

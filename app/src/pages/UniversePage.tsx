@@ -3,7 +3,13 @@ import * as anchor from "@coral-xyz/anchor";
 
 import { ensureClient, logSignature, useAppState } from "../App";
 import { Field, Panel } from "../components/Panel";
-import { deriveUniverse, enumValue, systemProgram } from "../lib/stellar";
+import {
+  deriveRegistry,
+  deriveUniverse,
+  deriveUniverseIndex,
+  enumValue,
+  systemProgram,
+} from "../lib/stellar";
 
 export function UniversePage() {
   const state = useAppState();
@@ -23,6 +29,15 @@ export function UniversePage() {
     if (!client || !universe) return;
     setLoading(true);
     try {
+      const registry = deriveRegistry();
+      const registryAccount = await client.provider.connection.getAccountInfo(registry);
+      const registryData = registryAccount
+        ? await client.program.account.registry.fetch(registry)
+        : null;
+      const globalIndex = registryAccount
+        ? Number((registryData?.universeCount as any)?.toNumber?.() ?? 0)
+        : 0;
+      const universeLookup = deriveUniverseIndex(globalIndex);
       const signature = await client.program.methods
         .createUniverse(
           new anchor.BN(universeIndex),
@@ -32,7 +47,9 @@ export function UniversePage() {
           open,
         )
         .accountsStrict({
+          registry,
           universe,
+          universeLookup,
           owner: state.walletPublicKey!,
           systemProgram,
         })

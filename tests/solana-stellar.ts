@@ -15,9 +15,21 @@ describe("solana-stellar", () => {
   const toLeBytes = (value: number) =>
     new anchor.BN(value).toArrayLike(Buffer, "le", 8);
 
+  const registryPda = () =>
+    anchor.web3.PublicKey.findProgramAddressSync(
+      [Buffer.from("registry")],
+      program.programId
+    )[0];
+
   const universePda = (index: number) =>
     anchor.web3.PublicKey.findProgramAddressSync(
       [Buffer.from("universe"), owner.publicKey.toBuffer(), toLeBytes(index)],
+      program.programId
+    )[0];
+
+  const universeIndexPda = (globalIndex: number) =>
+    anchor.web3.PublicKey.findProgramAddressSync(
+      [Buffer.from("universe_index"), toLeBytes(globalIndex)],
       program.programId
     )[0];
 
@@ -81,6 +93,8 @@ describe("solana-stellar", () => {
 
   it("creates a universe, asset graph, release vault, and revenue split", async () => {
     const universe = universePda(0);
+    const registry = registryPda();
+    const universeLookup = universeIndexPda(0);
     const parentAsset = assetPda(universe, 0);
     const childAsset = assetPda(universe, 1);
     const parentLink = linkPda(childAsset, parentAsset);
@@ -98,7 +112,9 @@ describe("solana-stellar", () => {
         true
       )
       .accountsStrict({
+        registry,
         universe,
+        universeLookup,
         owner: owner.publicKey,
         systemProgram: anchor.web3.SystemProgram.programId,
       })
@@ -109,6 +125,7 @@ describe("solana-stellar", () => {
         new anchor.BN(0),
         { image: {} } as any,
         { concept: {} } as any,
+        { ccBy4: {} } as any,
         "QmConceptMetadataHash",
         "QmConceptPreviewHash"
       )
@@ -139,6 +156,7 @@ describe("solana-stellar", () => {
         new anchor.BN(1),
         { model3D: {} } as any,
         { final: {} } as any,
+        { unknown: {} } as any,
         "QmModelMetadataHash",
         "QmModelPreviewHash"
       )
@@ -246,6 +264,9 @@ describe("solana-stellar", () => {
       .rpc();
 
     const fetchedUniverse = await program.account.universe.fetch(universe);
+    const fetchedRegistry = await program.account.registry.fetch(registry);
+    const fetchedUniverseIndex =
+      await program.account.universeIndex.fetch(universeLookup);
     const fetchedChild = await program.account.asset.fetch(childAsset);
     const fetchedLink = await program.account.assetParent.fetch(parentLink);
     const fetchedRelease = await program.account.release.fetch(release);
@@ -254,8 +275,13 @@ describe("solana-stellar", () => {
     );
 
     expect(fetchedUniverse.assetCount.toNumber()).to.equal(2);
+    expect(fetchedUniverse.globalIndex.toNumber()).to.equal(0);
+    expect(fetchedRegistry.universeCount.toNumber()).to.equal(1);
+    expect(fetchedUniverseIndex.universe.toBase58()).to.equal(universe.toBase58());
+    expect(fetchedUniverseIndex.ownerIndex.toNumber()).to.equal(0);
     expect(fetchedUniverse.releaseCount.toNumber()).to.equal(1);
     expect(fetchedChild.parentCount).to.equal(1);
+    expect(fetchedChild.licenseKind).to.deep.equal({ ccBy4: {} });
     expect(fetchedChild.status).to.deep.equal({ finalized: {} });
     expect(fetchedLink.parentAsset.toBase58()).to.equal(parentAsset.toBase58());
     expect(fetchedRelease.status).to.deep.equal({ finalized: {} });
@@ -268,6 +294,8 @@ describe("solana-stellar", () => {
 
   it("finalizes equal lineage shares across merged branches", async () => {
     const universe = universePda(1);
+    const registry = registryPda();
+    const universeLookup = universeIndexPda(1);
     const baseAsset = assetPda(universe, 0);
     const uvAsset = assetPda(universe, 1);
     const animationAsset = assetPda(universe, 2);
@@ -290,7 +318,9 @@ describe("solana-stellar", () => {
         true
       )
       .accountsStrict({
+        registry,
         universe,
+        universeLookup,
         owner: owner.publicKey,
         systemProgram: anchor.web3.SystemProgram.programId,
       })
@@ -301,6 +331,7 @@ describe("solana-stellar", () => {
         new anchor.BN(0),
         { image: {} } as any,
         { concept: {} } as any,
+        { ccBy4: {} } as any,
         "QmBaseMetadataHash",
         "QmBasePreviewHash"
       )
@@ -325,6 +356,7 @@ describe("solana-stellar", () => {
         new anchor.BN(1),
         { model3D: {} } as any,
         { texture: {} } as any,
+        { ccBy4: {} } as any,
         "QmUvMetadataHash",
         "QmUvPreviewHash"
       )
@@ -362,6 +394,7 @@ describe("solana-stellar", () => {
         new anchor.BN(2),
         { animation: {} } as any,
         { motion: {} } as any,
+        { ccBy4: {} } as any,
         "QmAnimMetadataHash",
         "QmAnimPreviewHash"
       )
@@ -406,6 +439,7 @@ describe("solana-stellar", () => {
         new anchor.BN(3),
         { model3D: {} } as any,
         { final: {} } as any,
+        { ccBy4: {} } as any,
         "QmFinalMetadataHash",
         "QmFinalPreviewHash"
       )
@@ -543,12 +577,18 @@ describe("solana-stellar", () => {
       .rpc();
 
     const fetchedRelease = await program.account.release.fetch(release);
+    const fetchedUniverse = await program.account.universe.fetch(universe);
+    const fetchedUniverseIndex =
+      await program.account.universeIndex.fetch(universeLookup);
     const shares = await Promise.all(
       shareAccounts.map((share) =>
         program.account.contributorShare.fetch(share)
       )
     );
 
+    expect(fetchedUniverse.globalIndex.toNumber()).to.equal(1);
+    expect(fetchedUniverseIndex.universe.toBase58()).to.equal(universe.toBase58());
+    expect(fetchedUniverseIndex.ownerIndex.toNumber()).to.equal(1);
     expect(fetchedRelease.status).to.deep.equal({ finalized: {} });
     expect(fetchedRelease.distributionModel).to.deep.equal({
       lineageEqual: {},
