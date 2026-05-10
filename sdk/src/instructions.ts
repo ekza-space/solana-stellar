@@ -358,6 +358,33 @@ export async function finalizeLineageEqualRelease(
   return { signature };
 }
 
+export async function finalizeWeightedRelease(
+  client: StellarClient,
+  args: {
+    universe: PublicKey;
+    release: PublicKey;
+    asset: PublicKey;
+    owner: PublicKey;
+    assetCount: number;
+    linkCount: number;
+    remainingAccounts: AccountMeta[];
+  }
+) {
+  const signature = await client.program.methods
+    .finalizeWeightedRelease(args.assetCount, args.linkCount)
+    .accountsStrict({
+      universe: args.universe,
+      release: args.release,
+      asset: args.asset,
+      owner: args.owner,
+      systemProgram: systemProgram(),
+    })
+    .remainingAccounts(args.remainingAccounts)
+    .rpc();
+
+  return { signature };
+}
+
 export async function linkAvatarData(
   client: StellarClient,
   args: {

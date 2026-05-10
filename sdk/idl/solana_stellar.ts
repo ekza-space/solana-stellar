@@ -617,6 +617,43 @@ export type SolanaStellar = {
       args: [];
     },
     {
+      name: "finalizeWeightedRelease";
+      discriminator: [84, 228, 162, 41, 173, 60, 169, 68];
+      accounts: [
+        {
+          name: "universe";
+        },
+        {
+          name: "release";
+          writable: true;
+        },
+        {
+          name: "asset";
+          writable: true;
+        },
+        {
+          name: "owner";
+          writable: true;
+          signer: true;
+          relations: ["universe"];
+        },
+        {
+          name: "systemProgram";
+          address: "11111111111111111111111111111111";
+        }
+      ];
+      args: [
+        {
+          name: "assetCount";
+          type: "u16";
+        },
+        {
+          name: "linkCount";
+          type: "u16";
+        }
+      ];
+    },
+    {
       name: "linkAvatarData";
       discriminator: [100, 18, 17, 99, 22, 120, 141, 252];
       accounts: [
