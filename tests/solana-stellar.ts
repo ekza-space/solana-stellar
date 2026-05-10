@@ -598,4 +598,66 @@ describe("solana-stellar", () => {
       3333, 3333, 3334,
     ]);
   });
+
+  it("keeps universe collaboration policy immutable after creation", async () => {
+    const registry = registryPda();
+    const registryDataBefore = (await program.account.registry.fetch(
+      registry
+    )) as any;
+    const globalIndex = registryDataBefore.universeCount.toNumber();
+    const ownerIndex = globalIndex;
+    const universe = universePda(ownerIndex);
+    const universeLookup = universeIndexPda(globalIndex);
+
+    await program.methods
+      .createUniverse(
+        new anchor.BN(ownerIndex),
+        "QmImmutablePolicyMetadata",
+        { model3D: {} } as any,
+        { equal: {} } as any,
+        true
+      )
+      .accountsStrict({
+        registry,
+        universe,
+        universeLookup,
+        owner: owner.publicKey,
+        systemProgram: anchor.web3.SystemProgram.programId,
+      })
+      .rpc();
+
+    await program.methods
+      .updateUniverse(
+        "QmImmutablePolicyMetadata2",
+        false,
+        { equal: {} } as any
+      )
+      .accountsStrict({
+        universe,
+        owner: owner.publicKey,
+      })
+      .rpc();
+
+    try {
+      await program.methods
+        .updateUniverse(
+          "QmImmutablePolicyMetadata3",
+          true,
+          { custom: {} } as any
+        )
+        .accountsStrict({
+          universe,
+          owner: owner.publicKey,
+        })
+        .rpc();
+      expect.fail("Expected collaboration policy change to be rejected");
+    } catch (error: any) {
+      expect(error.error?.errorCode?.code).to.equal(
+        "ImmutableCollaborationPolicy"
+      );
+    }
+
+    const fetchedUniverse = await program.account.universe.fetch(universe);
+    expect(fetchedUniverse.collaborationPolicy).to.deep.equal({ equal: {} });
+  });
 });

@@ -870,21 +870,26 @@
     },
     {
       "code": 6019,
+      "name": "ImmutableCollaborationPolicy",
+      "msg": "Collaboration policy is immutable after universe creation."
+    },
+    {
+      "code": 6020,
       "name": "InvalidRevenueAmount",
       "msg": "Invalid revenue amount."
     },
     {
-      "code": 6020,
+      "code": 6021,
       "name": "NoRevenueToClaim",
       "msg": "No revenue available to claim."
     },
     {
-      "code": 6021,
+      "code": 6022,
       "name": "InsufficientVaultBalance",
       "msg": "Release vault balance is insufficient."
     },
     {
-      "code": 6022,
+      "code": 6023,
       "name": "NumericalOverflow",
       "msg": "Numerical overflow occurred."
     }
@@ -1557,6 +1562,11 @@
           },
           {
             "name": "collaboration_policy",
+            "docs": [
+              "Revenue distribution policy used for releases in this universe.",
+              "It is immutable after universe creation so admins cannot alter the",
+              "economic deal that contributors relied on when joining."
+            ],
             "type": {
               "defined": {
                 "name": "CollaborationPolicy"

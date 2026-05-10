@@ -924,21 +924,26 @@ export type SolanaStellar = {
     },
     {
       code: 6019;
+      name: "immutableCollaborationPolicy";
+      msg: "Collaboration policy is immutable after universe creation.";
+    },
+    {
+      code: 6020;
       name: "invalidRevenueAmount";
       msg: "Invalid revenue amount.";
     },
     {
-      code: 6020;
+      code: 6021;
       name: "noRevenueToClaim";
       msg: "No revenue available to claim.";
     },
     {
-      code: 6021;
+      code: 6022;
       name: "insufficientVaultBalance";
       msg: "Release vault balance is insufficient.";
     },
     {
-      code: 6022;
+      code: 6023;
       name: "numericalOverflow";
       msg: "Numerical overflow occurred.";
     }
@@ -1611,6 +1616,11 @@ export type SolanaStellar = {
           },
           {
             name: "collaborationPolicy";
+            docs: [
+              "Revenue distribution policy used for releases in this universe.",
+              "It is immutable after universe creation so admins cannot alter the",
+              "economic deal that contributors relied on when joining."
+            ];
             type: {
               defined: {
                 name: "collaborationPolicy";

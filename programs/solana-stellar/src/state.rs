@@ -36,6 +36,9 @@ pub struct Universe {
     pub open: bool,
     pub status: UniverseStatus,
     pub project_type: AssetKind,
+    /// Revenue distribution policy used for releases in this universe.
+    /// It is immutable after universe creation so admins cannot alter the
+    /// economic deal that contributors relied on when joining.
     pub collaboration_policy: CollaborationPolicy,
     pub metadata_hash: String,
     pub created_at: i64,

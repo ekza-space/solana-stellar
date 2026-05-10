@@ -71,9 +71,12 @@ pub fn update_universe(
     validate_hash(&metadata_hash)?;
 
     let universe = &mut ctx.accounts.universe;
+    require!(
+        universe.collaboration_policy == collaboration_policy,
+        StellarError::ImmutableCollaborationPolicy
+    );
     universe.metadata_hash = metadata_hash;
     universe.open = open;
-    universe.collaboration_policy = collaboration_policy;
     universe.updated_at = Clock::get()?.unix_timestamp;
 
     emit!(UniverseUpdated {
