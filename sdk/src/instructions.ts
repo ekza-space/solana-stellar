@@ -449,3 +449,27 @@ export async function claimRevenue(
 
   return { vault, share, signature };
 }
+
+export async function claimRevenueFor(
+  client: StellarClient,
+  args: {
+    release: PublicKey;
+    authority: PublicKey;
+    beneficiary: PublicKey;
+  }
+) {
+  const vault = deriveVault(args.release);
+  const share = deriveShare(args.release, args.beneficiary);
+  const signature = await client.program.methods
+    .claimRevenueFor()
+    .accountsStrict({
+      release: args.release,
+      vault,
+      share,
+      beneficiary: args.beneficiary,
+      authority: args.authority,
+    })
+    .rpc();
+
+  return { vault, share, signature };
+}

@@ -176,6 +176,62 @@
       "args": []
     },
     {
+      "name": "claim_revenue_for",
+      "discriminator": [18, 77, 74, 138, 170, 122, 165, 180],
+      "accounts": [
+        {
+          "name": "release"
+        },
+        {
+          "name": "vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114, 101, 108, 101, 97, 115, 101, 95, 118, 97, 117, 108, 116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "release"
+              }
+            ]
+          }
+        },
+        {
+          "name": "share",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [115, 104, 97, 114, 101]
+              },
+              {
+                "kind": "account",
+                "path": "release"
+              },
+              {
+                "kind": "account",
+                "path": "beneficiary"
+              }
+            ]
+          }
+        },
+        {
+          "name": "beneficiary",
+          "writable": true
+        },
+        {
+          "name": "authority",
+          "signer": true
+        }
+      ],
+      "args": []
+    },
+    {
       "name": "close_asset",
       "discriminator": [39, 124, 90, 146, 16, 82, 77, 253],
       "accounts": [

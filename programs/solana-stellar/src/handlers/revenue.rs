@@ -3,9 +3,10 @@ use anchor_lang::system_program::{transfer, Transfer};
 
 use crate::{
     constants::BPS_DENOMINATOR,
-    contexts::{ClaimRevenue, DepositRevenue},
+    contexts::{ClaimRevenue, ClaimRevenueFor, DepositRevenue},
     error::StellarError,
     events::{RevenueClaimed, RevenueDeposited},
+    state::{ContributorShare, Release, ReleaseVault},
 };
 
 pub fn deposit_revenue(ctx: Context<DepositRevenue>, amount: u64) -> Result<()> {
@@ -40,22 +41,50 @@ pub fn deposit_revenue(ctx: Context<DepositRevenue>, amount: u64) -> Result<()> 
 
 pub fn claim_revenue(ctx: Context<ClaimRevenue>) -> Result<()> {
     let release = &ctx.accounts.release;
+    let vault = &ctx.accounts.vault;
+    let share = &mut ctx.accounts.share;
+    let contributor = ctx.accounts.contributor.to_account_info();
+
+    process_claim(release, vault, share, &contributor)
+}
+
+pub fn claim_revenue_for(ctx: Context<ClaimRevenueFor>) -> Result<()> {
+    let release = &ctx.accounts.release;
+    require!(release.accepts_revenue(), StellarError::ReleaseNotFinalized);
+    let authority = ctx.accounts.authority.key();
+    require!(
+        authority == release.authority || authority == ctx.accounts.share.contributor,
+        StellarError::Unauthorized
+    );
+
+    let vault = &ctx.accounts.vault;
+    let share = &mut ctx.accounts.share;
+    let beneficiary = ctx.accounts.beneficiary.to_account_info();
+
+    process_claim(release, vault, share, &beneficiary)
+}
+
+fn process_claim(
+    release: &Account<Release>,
+    vault: &Account<ReleaseVault>,
+    share: &mut Account<ContributorShare>,
+    recipient: &AccountInfo,
+) -> Result<()> {
     require!(release.accepts_revenue(), StellarError::ReleaseNotFinalized);
 
-    let share = &mut ctx.accounts.share;
     let entitled = release
         .total_deposited_lamports
         .checked_mul(share.bps as u64)
         .ok_or(StellarError::NumericalOverflow)?
         .checked_div(BPS_DENOMINATOR as u64)
         .ok_or(StellarError::NumericalOverflow)?;
+
     let claimable = entitled
         .checked_sub(share.claimed_lamports)
         .ok_or(StellarError::NumericalOverflow)?;
     require!(claimable > 0, StellarError::NoRevenueToClaim);
 
-    let vault_info = ctx.accounts.vault.to_account_info();
-    let contributor_info = ctx.accounts.contributor.to_account_info();
+    let vault_info = vault.to_account_info();
     require!(
         vault_info.lamports() >= claimable,
         StellarError::InsufficientVaultBalance
@@ -65,7 +94,8 @@ pub fn claim_revenue(ctx: Context<ClaimRevenue>) -> Result<()> {
         .lamports()
         .checked_sub(claimable)
         .ok_or(StellarError::InsufficientVaultBalance)?;
-    **contributor_info.try_borrow_mut_lamports()? = contributor_info
+    let recipient_info = recipient.to_account_info();
+    **recipient_info.try_borrow_mut_lamports()? = recipient_info
         .lamports()
         .checked_add(claimable)
         .ok_or(StellarError::NumericalOverflow)?;
@@ -74,7 +104,7 @@ pub fn claim_revenue(ctx: Context<ClaimRevenue>) -> Result<()> {
 
     emit!(RevenueClaimed {
         release: release.key(),
-        contributor: ctx.accounts.contributor.key(),
+        contributor: share.contributor,
         amount: claimable,
         total_claimed: entitled,
     });

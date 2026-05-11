@@ -141,4 +141,8 @@ pub mod solana_stellar {
     pub fn claim_revenue(ctx: Context<ClaimRevenue>) -> Result<()> {
         handlers::claim_revenue(ctx)
     }
+
+    pub fn claim_revenue_for(ctx: Context<ClaimRevenueFor>) -> Result<()> {
+        handlers::claim_revenue_for(ctx)
+    }
 }

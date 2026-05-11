@@ -883,6 +883,200 @@ describe("solana-stellar", () => {
     ).to.equal(2500);
   });
 
+  it("distributes revenue proportionally and supports authority claim-on-behalf", async () => {
+    const registry = registryPda();
+    const registryAccount = await program.account.registry.fetch(registry);
+    const universeLookup = universeIndexPda(
+      registryAccount.universeCount.toNumber()
+    );
+
+    const universe = universePda(3);
+    const asset = assetPda(universe, 0);
+    const release = releasePda(universe, 0);
+    const vault = vaultPda(release);
+    const ownerShare = sharePda(release, owner.publicKey);
+    const contributorShare = sharePda(release, contributor.publicKey);
+    const branchShare = sharePda(release, branchContributor.publicKey);
+
+    await program.methods
+      .createUniverse(
+        new anchor.BN(3),
+        "QmUniverseRevenueMetadataHash",
+        { model3D: {} } as any,
+        { custom: {} } as any,
+        true
+      )
+      .accountsStrict({
+        registry,
+        universe,
+        universeLookup,
+        owner: owner.publicKey,
+        systemProgram: anchor.web3.SystemProgram.programId,
+      })
+      .rpc();
+
+    await program.methods
+      .createAsset(
+        new anchor.BN(0),
+        { image: {} } as any,
+        { concept: {} } as any,
+        { ccBy4: {} } as any,
+        "QmRevenueMetadataHash",
+        "QmRevenuePreviewHash"
+      )
+      .accountsStrict({
+        universe,
+        asset,
+        creator: owner.publicKey,
+        systemProgram: anchor.web3.SystemProgram.programId,
+      })
+      .rpc();
+    await program.methods
+      .submitAsset()
+      .accountsStrict({ asset, creator: owner.publicKey })
+      .rpc();
+    await program.methods
+      .approveAsset()
+      .accountsStrict({ universe, asset, owner: owner.publicKey })
+      .rpc();
+
+    await program.methods
+      .createRelease(new anchor.BN(0), "QmReleaseRevenueMetadataHash")
+      .accountsStrict({
+        universe,
+        asset,
+        release,
+        vault,
+        owner: owner.publicKey,
+        systemProgram: anchor.web3.SystemProgram.programId,
+      })
+      .rpc();
+
+    await program.methods
+      .addReleaseShare(3333)
+      .accountsStrict({
+        universe,
+        release,
+        share: ownerShare,
+        contributor: owner.publicKey,
+        owner: owner.publicKey,
+        systemProgram: anchor.web3.SystemProgram.programId,
+      })
+      .rpc();
+
+    await program.methods
+      .addReleaseShare(3333)
+      .accountsStrict({
+        universe,
+        release,
+        share: contributorShare,
+        contributor: contributor.publicKey,
+        owner: owner.publicKey,
+        systemProgram: anchor.web3.SystemProgram.programId,
+      })
+      .rpc();
+
+    await program.methods
+      .addReleaseShare(3334)
+      .accountsStrict({
+        universe,
+        release,
+        share: branchShare,
+        contributor: branchContributor.publicKey,
+        owner: owner.publicKey,
+        systemProgram: anchor.web3.SystemProgram.programId,
+      })
+      .rpc();
+
+    await program.methods
+      .finalizeRelease()
+      .accountsStrict({
+        universe,
+        release,
+        asset,
+        owner: owner.publicKey,
+      })
+      .rpc();
+
+    const vaultBalanceBeforeDeposit = await provider.connection.getBalance(vault);
+
+    await program.methods
+      .depositRevenue(new anchor.BN(1_000_000))
+      .accountsStrict({
+        release,
+        vault,
+        payer: owner.publicKey,
+        systemProgram: anchor.web3.SystemProgram.programId,
+      })
+      .rpc();
+
+    await program.methods
+      .claimRevenueFor()
+      .accountsStrict({
+        release,
+        vault,
+        share: contributorShare,
+        beneficiary: contributor.publicKey,
+        authority: owner.publicKey,
+      })
+      .rpc();
+    await program.methods
+      .claimRevenueFor()
+      .accountsStrict({
+        release,
+        vault,
+        share: branchShare,
+        beneficiary: branchContributor.publicKey,
+        authority: owner.publicKey,
+      })
+      .rpc();
+    await program.methods
+      .claimRevenueFor()
+      .accountsStrict({
+        release,
+        vault,
+        share: ownerShare,
+        beneficiary: owner.publicKey,
+        authority: owner.publicKey,
+      })
+      .rpc();
+
+    const fetchedOwnerShare = await program.account.contributorShare.fetch(ownerShare);
+    const fetchedContributorShare =
+      await program.account.contributorShare.fetch(contributorShare);
+    const fetchedBranchShare = await program.account.contributorShare.fetch(branchShare);
+
+    expect(fetchedOwnerShare.claimedLamports.toNumber()).to.equal(333_300);
+    expect(fetchedContributorShare.claimedLamports.toNumber()).to.equal(333_300);
+    expect(fetchedBranchShare.claimedLamports.toNumber()).to.equal(333_400);
+
+    const fetchedRelease = await program.account.release.fetch(release);
+    expect(fetchedRelease.totalShareBps).to.equal(10_000);
+    expect(fetchedRelease.totalDepositedLamports.toNumber()).to.equal(
+      1_000_000
+    );
+
+    const vaultBalanceAfterClaims = await provider.connection.getBalance(vault);
+    expect(vaultBalanceAfterClaims).to.equal(vaultBalanceBeforeDeposit);
+
+    try {
+      await program.methods
+        .claimRevenueFor()
+        .accountsStrict({
+          release,
+          vault,
+          share: ownerShare,
+          beneficiary: owner.publicKey,
+          authority: contributor.publicKey,
+        })
+        .signers([contributor])
+        .rpc();
+      expect.fail("should reject claim on behalf from unauthorized authority");
+    } catch (error: any) {
+      expect(error.message).to.include("Unauthorized");
+    }
+  });
+
   it("keeps universe collaboration policy immutable after creation", async () => {
     const registry = registryPda();
     const registryDataBefore = (await program.account.registry.fetch(

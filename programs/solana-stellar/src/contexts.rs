@@ -328,3 +328,34 @@ pub struct ClaimRevenue<'info> {
     #[account(mut)]
     pub contributor: Signer<'info>,
 }
+
+#[derive(Accounts)]
+pub struct ClaimRevenueFor<'info> {
+    pub release: Account<'info, Release>,
+    #[account(
+        mut,
+        seeds = [
+            VAULT_SEED,
+            release.key().as_ref()
+        ],
+        bump = vault.bump,
+        constraint = vault.release == release.key() @ StellarError::ReleaseMismatch
+    )]
+    pub vault: Account<'info, ReleaseVault>,
+    #[account(
+        mut,
+        seeds = [
+            SHARE_SEED,
+            release.key().as_ref(),
+            beneficiary.key().as_ref()
+        ],
+        bump = share.bump,
+        constraint = share.release == release.key() @ StellarError::ReleaseMismatch,
+        constraint = share.contributor == beneficiary.key() @ StellarError::Unauthorized
+    )]
+    pub share: Account<'info, ContributorShare>,
+    /// CHECK: The beneficiary can be any destination wallet that will receive revenue.
+    #[account(mut)]
+    pub beneficiary: AccountInfo<'info>,
+    pub authority: Signer<'info>,
+}

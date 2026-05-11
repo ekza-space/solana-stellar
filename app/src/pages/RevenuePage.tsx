@@ -43,16 +43,25 @@ export function RevenuePage() {
 
   async function claimRevenue() {
     const client = ensureClient(state);
-    if (!client || !release || !vault || !share) return;
+    if (!client || !release || !vault || !share || !contributorKey) return;
     setLoading(true);
     try {
+      const releaseData = await client.program.account.release.fetch(release);
+      const authority = releaseData.authority;
+      const wallet = state.walletPublicKey;
+      if (!wallet) throw new Error("Wallet not connected");
+      if (!authority.equals(wallet) && !contributorKey.equals(wallet)) {
+        throw new Error("Wallet is not allowed to claim for this beneficiary");
+      }
+
       const signature = await client.program.methods
-        .claimRevenue()
+        .claimRevenueFor()
         .accountsStrict({
           release,
           vault,
           share,
-          contributor: state.walletPublicKey!,
+          beneficiary: contributorKey,
+          authority: wallet,
         })
         .rpc();
       logSignature(state, "Revenue claimed", signature);
@@ -80,7 +89,7 @@ export function RevenuePage() {
         <Field label="Deposit amount in SOL">
           <input value={amountSol} onChange={(event) => setAmountSol(event.target.value)} />
         </Field>
-        <Field label="Contributor wallet" hint="Leave empty to claim with connected wallet.">
+        <Field label="Contributor wallet" hint="Leave empty to claim for connected wallet.">
           <input value={contributor} onChange={(event) => setContributor(event.target.value)} />
         </Field>
       </div>
