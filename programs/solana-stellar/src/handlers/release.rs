@@ -25,6 +25,10 @@ fn is_auto_lineage_model(policy: CollaborationPolicy) -> bool {
     )
 }
 
+fn is_manual_split_model(policy: CollaborationPolicy) -> bool {
+    matches!(policy, CollaborationPolicy::Custom)
+}
+
 pub fn create_release(
     ctx: Context<CreateRelease>,
     release_index: u64,
@@ -96,7 +100,7 @@ pub fn add_release_share(ctx: Context<AddReleaseShare>, bps: u16) -> Result<()> 
         StellarError::ReleaseLocked
     );
     require!(
-        !is_auto_lineage_model(release.distribution_model),
+        is_manual_split_model(release.distribution_model),
         StellarError::InvalidDistributionModel
     );
 
@@ -178,7 +182,8 @@ pub fn finalize_lineage_equal_release<'info>(
         StellarError::ReleaseLocked
     );
     require!(
-        release.distribution_model == CollaborationPolicy::LineageEqual,
+        release.distribution_model == CollaborationPolicy::Equal
+            || release.distribution_model == CollaborationPolicy::LineageEqual,
         StellarError::InvalidDistributionModel
     );
     require!(release.total_share_bps == 0, StellarError::InvalidShareBps);

@@ -295,7 +295,7 @@ describe("solana-stellar", () => {
     expect(fetchedShare.claimedLamports.toNumber()).to.equal(600_000);
   });
 
-  it("finalizes equal lineage shares across merged branches", async () => {
+  it("finalizes legacy equal policy as automatic equal lineage shares", async () => {
     const universe = universePda(1);
     const registry = registryPda();
     const universeLookup = universeIndexPda(1);
@@ -317,7 +317,7 @@ describe("solana-stellar", () => {
         new anchor.BN(1),
         "QmUniverseMetadataHash2",
         { model3D: {} } as any,
-        { lineageEqual: {} } as any,
+        { equal: {} } as any,
         true
       )
       .accountsStrict({
