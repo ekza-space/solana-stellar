@@ -9,6 +9,8 @@ use crate::{
     state::{ContributorShare, Release, ReleaseVault},
 };
 
+const RELEASE_VAULT_ACCOUNT_SPACE: usize = 8 + ReleaseVault::INIT_SPACE;
+
 pub fn deposit_revenue(ctx: Context<DepositRevenue>, amount: u64) -> Result<()> {
     require!(amount > 0, StellarError::InvalidRevenueAmount);
     require!(
@@ -72,6 +74,9 @@ fn process_claim(
 ) -> Result<()> {
     require!(release.accepts_revenue(), StellarError::ReleaseNotFinalized);
 
+    let rent = Rent::get()?;
+    let vault_reserve = rent.minimum_balance(RELEASE_VAULT_ACCOUNT_SPACE);
+
     let entitled = release
         .total_deposited_lamports
         .checked_mul(share.bps as u64)
@@ -85,9 +90,13 @@ fn process_claim(
     require!(claimable > 0, StellarError::NoRevenueToClaim);
 
     let vault_info = vault.to_account_info();
+    let vault_lamports = vault_info.lamports();
+    let available_for_claim = vault_lamports
+        .checked_sub(vault_reserve)
+        .ok_or(StellarError::InsufficientVaultBalanceForClaim)?;
     require!(
-        vault_info.lamports() >= claimable,
-        StellarError::InsufficientVaultBalance
+        available_for_claim >= claimable,
+        StellarError::InsufficientVaultBalanceForClaim
     );
 
     **vault_info.try_borrow_mut_lamports()? = vault_info

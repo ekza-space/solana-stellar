@@ -44,6 +44,8 @@ pub enum StellarError {
     ImmutableCollaborationPolicy,
     #[msg("Invalid revenue amount.")]
     InvalidRevenueAmount,
+    #[msg("Release vault balance is below required reserve for claims.")]
+    InsufficientVaultBalanceForClaim,
     #[msg("No revenue available to claim.")]
     NoRevenueToClaim,
     #[msg("Release vault balance is insufficient.")]

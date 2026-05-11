@@ -60,6 +60,8 @@ describe("solana-stellar", () => {
       program.programId
     )[0];
 
+  const releaseVaultRentExemptBytes = 8 + 32 + 1;
+
   const sharePda = (
     release: anchor.web3.PublicKey,
     contributorPk: anchor.web3.PublicKey
@@ -1058,6 +1060,10 @@ describe("solana-stellar", () => {
 
     const vaultBalanceAfterClaims = await provider.connection.getBalance(vault);
     expect(vaultBalanceAfterClaims).to.equal(vaultBalanceBeforeDeposit);
+    const vaultRentReserve = await provider.connection.getMinimumBalanceForRentExemption(
+      releaseVaultRentExemptBytes
+    );
+    expect(vaultBalanceAfterClaims).to.equal(vaultRentReserve);
 
     try {
       await program.methods
