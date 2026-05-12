@@ -34,13 +34,39 @@ export function createClient(
 }
 
 export function explorerUrl(signature: string, endpoint: string) {
+  const resolvedEndpoint = endpointForExplorer(endpoint);
   const cluster = endpoint.includes("devnet") ? "devnet" : "custom";
-  if (endpoint.includes("127.0.0.1") || endpoint.includes("localhost")) {
+  if (resolvedEndpoint.includes("127.0.0.1") || resolvedEndpoint.includes("localhost")) {
     return `https://explorer.solana.com/tx/${signature}?cluster=custom&customUrl=${encodeURIComponent(
-      endpoint
+      resolvedEndpoint
     )}`;
   }
   return `https://explorer.solana.com/tx/${signature}?cluster=${cluster}`;
+}
+
+export function accountExplorerUrl(address: string, endpoint: string) {
+  const resolvedEndpoint = endpointForExplorer(endpoint);
+  const cluster = endpoint.includes("devnet") ? "devnet" : "custom";
+  if (resolvedEndpoint.includes("127.0.0.1") || resolvedEndpoint.includes("localhost")) {
+    return `https://explorer.solana.com/address/${address}?cluster=custom&customUrl=${encodeURIComponent(
+      resolvedEndpoint
+    )}`;
+  }
+  return `https://explorer.solana.com/address/${address}?cluster=${cluster}`;
+}
+
+export function solscanAccountUrl(address: string, endpoint: string) {
+  if (endpoint.includes("devnet")) return `https://solscan.io/account/${address}?cluster=devnet`;
+  if (endpoint.includes("testnet")) return `https://solscan.io/account/${address}?cluster=testnet`;
+  if (endpoint.includes("localhost") || endpoint.includes("127.0.0.1")) return null;
+  return `https://solscan.io/account/${address}`;
+}
+
+function endpointForExplorer(endpoint: string) {
+  if (!endpoint || !endpoint.includes("://")) {
+    return "http://127.0.0.1:8899";
+  }
+  return endpoint;
 }
 
 export function toLeBytes(value: number) {

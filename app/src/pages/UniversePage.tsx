@@ -9,6 +9,8 @@ import {
   deriveUniverse,
   deriveUniverseIndex,
   enumValue,
+  accountExplorerUrl,
+  solscanAccountUrl,
   systemProgram,
 } from "../lib/stellar";
 
@@ -119,10 +121,24 @@ export function UniversePage() {
       </div>
 
       {universe ? (
-        <div className="derived">
-          <span>Derived universe PDA</span>
-          <code>{universe.toBase58()}</code>
+      <div className="derived">
+        <span>Derived universe PDA</span>
+        <code>{universe.toBase58()}</code>
+        <div className="links">
+          <a href={accountExplorerUrl(universe.toBase58(), state.endpoint)} target="_blank" rel="noreferrer">
+            Open in Solana Explorer
+          </a>
+          {solscanAccountUrl(universe.toBase58(), state.endpoint) ? (
+            <a
+              href={solscanAccountUrl(universe.toBase58(), state.endpoint)!}
+              target="_blank"
+              rel="noreferrer"
+            >
+              Open in Solscan
+            </a>
+          ) : null}
         </div>
+      </div>
       ) : null}
     </Panel>
   );

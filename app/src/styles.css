@@ -255,6 +255,22 @@ code {
   background: rgba(255, 255, 255, 0.05);
 }
 
+.links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.links a {
+  color: #dbeafe;
+  text-decoration: underline;
+}
+
+.links a:hover {
+  text-decoration: none;
+  color: #c4b5fd;
+}
+
 .address-list div {
   display: grid;
   gap: 4px;
