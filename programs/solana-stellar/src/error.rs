@@ -40,8 +40,12 @@ pub enum StellarError {
     InvalidShareBps,
     #[msg("Invalid release distribution model for this operation.")]
     InvalidDistributionModel,
+    #[msg("Collaboration policy is immutable after universe creation.")]
+    ImmutableCollaborationPolicy,
     #[msg("Invalid revenue amount.")]
     InvalidRevenueAmount,
+    #[msg("Release vault balance is below required reserve for claims.")]
+    InsufficientVaultBalanceForClaim,
     #[msg("No revenue available to claim.")]
     NoRevenueToClaim,
     #[msg("Release vault balance is insufficient.")]

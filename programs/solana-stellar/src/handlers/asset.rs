@@ -6,7 +6,7 @@ use crate::{
     },
     error::StellarError,
     events::{AssetCreated, AssetParentAdded, AssetStatusChanged},
-    state::{AssetKind, AssetStatus, AssetSubtype, UniverseStatus},
+    state::{AssetKind, AssetStatus, AssetSubtype, LicenseKind, UniverseStatus},
     utils::{validate_hash, validate_optional_hash},
 };
 
@@ -15,6 +15,7 @@ pub fn create_asset(
     asset_index: u64,
     kind: AssetKind,
     subtype: AssetSubtype,
+    license_kind: LicenseKind,
     metadata_hash: String,
     preview_hash: String,
 ) -> Result<()> {
@@ -48,6 +49,7 @@ pub fn create_asset(
     asset.bump = ctx.bumps.asset;
     asset.kind = kind;
     asset.subtype = subtype;
+    asset.license_kind = license_kind;
     asset.status = AssetStatus::Draft;
     asset.metadata_hash = metadata_hash;
     asset.preview_hash = preview_hash;
@@ -73,6 +75,7 @@ pub fn create_asset(
 
 pub fn update_asset_metadata(
     ctx: Context<UpdateAssetMetadata>,
+    license_kind: LicenseKind,
     metadata_hash: String,
     preview_hash: String,
 ) -> Result<()> {
@@ -87,6 +90,7 @@ pub fn update_asset_metadata(
 
     asset.metadata_hash = metadata_hash;
     asset.preview_hash = preview_hash;
+    asset.license_kind = license_kind;
     asset.updated_at = Clock::get()?.unix_timestamp;
 
     Ok(())
@@ -121,6 +125,7 @@ pub fn add_asset_parent(ctx: Context<AddAssetParent>) -> Result<()> {
         .parent_count
         .checked_add(1)
         .ok_or(StellarError::NumericalOverflow)?;
+    child.license_kind = parent.license_kind;
     child.updated_at = Clock::get()?.unix_timestamp;
 
     emit!(AssetParentAdded {

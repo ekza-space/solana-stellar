@@ -3,15 +3,42 @@ use anchor_lang::prelude::*;
 use crate::constants::MAX_HASH_LEN;
 
 #[account]
+pub struct Registry {
+    pub universe_count: u64,
+    pub bump: u8,
+}
+
+impl Registry {
+    pub const INIT_SPACE: usize = 8 + 1;
+}
+
+#[account]
+pub struct UniverseIndex {
+    pub global_index: u64,
+    pub universe: Pubkey,
+    pub owner: Pubkey,
+    pub owner_index: u64,
+    pub bump: u8,
+}
+
+impl UniverseIndex {
+    pub const INIT_SPACE: usize = 8 + 32 + 32 + 8 + 1;
+}
+
+#[account]
 pub struct Universe {
     pub owner: Pubkey,
     pub index: u64,
+    pub global_index: u64,
     pub bump: u8,
     pub asset_count: u64,
     pub release_count: u64,
     pub open: bool,
     pub status: UniverseStatus,
     pub project_type: AssetKind,
+    /// Revenue distribution policy used for releases in this universe.
+    /// It is immutable after universe creation so admins cannot alter the
+    /// economic deal that contributors relied on when joining.
     pub collaboration_policy: CollaborationPolicy,
     pub metadata_hash: String,
     pub created_at: i64,
@@ -19,7 +46,8 @@ pub struct Universe {
 }
 
 impl Universe {
-    pub const INIT_SPACE: usize = 32 + 8 + 1 + 8 + 8 + 1 + 1 + 1 + 1 + (4 + MAX_HASH_LEN) + 8 + 8;
+    pub const INIT_SPACE: usize =
+        32 + 8 + 8 + 1 + 8 + 8 + 1 + 1 + 1 + 1 + (4 + MAX_HASH_LEN) + 8 + 8;
 }
 
 #[account]
@@ -31,6 +59,7 @@ pub struct Asset {
     pub bump: u8,
     pub kind: AssetKind,
     pub subtype: AssetSubtype,
+    pub license_kind: LicenseKind,
     pub status: AssetStatus,
     pub metadata_hash: String,
     pub preview_hash: String,
@@ -41,7 +70,7 @@ pub struct Asset {
 
 impl Asset {
     pub const INIT_SPACE: usize =
-        32 + 8 + 32 + 32 + 1 + 1 + 1 + 1 + (4 + MAX_HASH_LEN) + (4 + MAX_HASH_LEN) + 8 + 8 + 2;
+        32 + 8 + 32 + 32 + 1 + 1 + 1 + 1 + 1 + (4 + MAX_HASH_LEN) + (4 + MAX_HASH_LEN) + 8 + 8 + 2;
 }
 
 #[account]
@@ -141,6 +170,19 @@ pub enum AssetSubtype {
     Preview,
     Final,
     Other,
+}
+
+#[derive(AnchorSerialize, AnchorDeserialize, Clone, Copy, PartialEq, Eq)]
+pub enum LicenseKind {
+    Unknown,
+    AllRightsReserved,
+    Cc0,
+    CcBy4,
+    CcBySa4,
+    CcByNc4,
+    CcByNcSa4,
+    Mit,
+    Custom,
 }
 
 #[derive(AnchorSerialize, AnchorDeserialize, Clone, Copy, PartialEq, Eq)]

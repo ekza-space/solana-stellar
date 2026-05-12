@@ -2,8 +2,17 @@ import { useState } from "react";
 import * as anchor from "@coral-xyz/anchor";
 
 import { ensureClient, logSignature, useAppState } from "../App";
+import { formatRpcError } from "../lib/errors";
 import { Field, Panel } from "../components/Panel";
-import { deriveUniverse, enumValue, systemProgram } from "../lib/stellar";
+import {
+  deriveRegistry,
+  deriveUniverse,
+  deriveUniverseIndex,
+  enumValue,
+  accountExplorerUrl,
+  solscanAccountUrl,
+  systemProgram,
+} from "../lib/stellar";
 
 export function UniversePage() {
   const state = useAppState();
@@ -23,6 +32,15 @@ export function UniversePage() {
     if (!client || !universe) return;
     setLoading(true);
     try {
+      const registry = deriveRegistry();
+      const registryAccount = await client.provider.connection.getAccountInfo(registry);
+      const registryData = registryAccount
+        ? await client.program.account.registry.fetch(registry)
+        : null;
+      const globalIndex = registryAccount
+        ? Number((registryData?.universeCount as any)?.toNumber?.() ?? 0)
+        : 0;
+      const universeLookup = deriveUniverseIndex(globalIndex);
       const signature = await client.program.methods
         .createUniverse(
           new anchor.BN(universeIndex),
@@ -32,7 +50,9 @@ export function UniversePage() {
           open,
         )
         .accountsStrict({
+          registry,
           universe,
+          universeLookup,
           owner: state.walletPublicKey!,
           systemProgram,
         })
@@ -41,7 +61,11 @@ export function UniversePage() {
       state.setAddresses((current) => ({ ...current, universe: universe.toBase58() }));
       logSignature(state, "Universe created", signature);
     } catch (error) {
-      state.addLog("error", "Create universe failed", String(error));
+      state.addLog(
+        "error",
+        "Create universe failed",
+        formatRpcError(error, "Could not create universe with current RPC endpoint.")
+      );
     } finally {
       setLoading(false);
     }
@@ -56,7 +80,14 @@ export function UniversePage() {
       state.setAddresses((current) => ({ ...current, universe: universe.toBase58() }));
       state.addLog("success", "Universe fetched", JSON.stringify(account, null, 2));
     } catch (error) {
-      state.addLog("error", "Fetch universe failed", String(error));
+      state.addLog(
+        "error",
+        "Fetch universe failed",
+        formatRpcError(
+          error,
+          "Could not fetch universe account with current RPC endpoint."
+        )
+      );
     } finally {
       setLoading(false);
     }
@@ -90,10 +121,24 @@ export function UniversePage() {
       </div>
 
       {universe ? (
-        <div className="derived">
-          <span>Derived universe PDA</span>
-          <code>{universe.toBase58()}</code>
+      <div className="derived">
+        <span>Derived universe PDA</span>
+        <code>{universe.toBase58()}</code>
+        <div className="links">
+          <a href={accountExplorerUrl(universe.toBase58(), state.endpoint)} target="_blank" rel="noreferrer">
+            Open in Solana Explorer
+          </a>
+          {solscanAccountUrl(universe.toBase58(), state.endpoint) ? (
+            <a
+              href={solscanAccountUrl(universe.toBase58(), state.endpoint)!}
+              target="_blank"
+              rel="noreferrer"
+            >
+              Open in Solscan
+            </a>
+          ) : null}
         </div>
+      </div>
       ) : null}
     </Panel>
   );

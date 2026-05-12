@@ -11,7 +11,8 @@ type ClusterState = {
   setCustomEndpoint: (endpoint: string) => void;
 };
 
-const LOCALNET = "http://127.0.0.1:8899";
+const LOCALNET =
+  typeof window === "undefined" ? "/rpc" : `${window.location.origin}/rpc`;
 const DEFAULT_CUSTOM = clusterApiUrl("devnet");
 
 const ClusterContext = createContext<ClusterState | null>(null);

@@ -18,6 +18,17 @@ use crate::{
     utils::validate_hash,
 };
 
+fn is_auto_lineage_model(policy: CollaborationPolicy) -> bool {
+    matches!(
+        policy,
+        CollaborationPolicy::LineageEqual | CollaborationPolicy::Weighted
+    )
+}
+
+fn is_manual_split_model(policy: CollaborationPolicy) -> bool {
+    matches!(policy, CollaborationPolicy::Custom)
+}
+
 pub fn create_release(
     ctx: Context<CreateRelease>,
     release_index: u64,
@@ -89,7 +100,7 @@ pub fn add_release_share(ctx: Context<AddReleaseShare>, bps: u16) -> Result<()> 
         StellarError::ReleaseLocked
     );
     require!(
-        release.distribution_model != CollaborationPolicy::LineageEqual,
+        is_manual_split_model(release.distribution_model),
         StellarError::InvalidDistributionModel
     );
 
@@ -128,7 +139,7 @@ pub fn finalize_release(ctx: Context<FinalizeRelease>) -> Result<()> {
         StellarError::ReleaseLocked
     );
     require!(
-        release.distribution_model != CollaborationPolicy::LineageEqual,
+        !is_auto_lineage_model(release.distribution_model),
         StellarError::InvalidDistributionModel
     );
     require!(
@@ -171,7 +182,8 @@ pub fn finalize_lineage_equal_release<'info>(
         StellarError::ReleaseLocked
     );
     require!(
-        release.distribution_model == CollaborationPolicy::LineageEqual,
+        release.distribution_model == CollaborationPolicy::Equal
+            || release.distribution_model == CollaborationPolicy::LineageEqual,
         StellarError::InvalidDistributionModel
     );
     require!(release.total_share_bps == 0, StellarError::InvalidShareBps);
@@ -357,6 +369,262 @@ pub fn finalize_lineage_equal_release<'info>(
     emit!(ReleaseDistributionModelSet {
         release: release_key,
         distribution_model: CollaborationPolicy::LineageEqual,
+        contributor_count: contributors.len() as u16,
+    });
+    emit!(ReleaseStatusChanged {
+        release: release_key,
+        status: ReleaseStatus::Finalized,
+    });
+    emit!(AssetStatusChanged {
+        asset: asset.key(),
+        status: AssetStatus::Finalized,
+    });
+
+    Ok(())
+}
+
+pub fn finalize_weighted_release<'info>(
+    ctx: Context<'_, '_, 'info, 'info, FinalizeLineageEqualRelease<'info>>,
+    asset_count: u16,
+    link_count: u16,
+) -> Result<()> {
+    let release = &mut ctx.accounts.release;
+    let asset = &mut ctx.accounts.asset;
+
+    require!(
+        release.status == ReleaseStatus::Draft,
+        StellarError::ReleaseLocked
+    );
+    require!(
+        release.distribution_model == CollaborationPolicy::Weighted,
+        StellarError::InvalidDistributionModel
+    );
+    require!(release.total_share_bps == 0, StellarError::InvalidShareBps);
+    require!(
+        asset.status == AssetStatus::Approved,
+        StellarError::InvalidAssetStatus
+    );
+    require!(asset_count > 0, StellarError::InvalidLineageProof);
+
+    let remaining = ctx.remaining_accounts;
+    let asset_count = asset_count as usize;
+    let link_count = link_count as usize;
+    require!(
+        remaining.len() >= asset_count + link_count,
+        StellarError::InvalidLineageProof
+    );
+
+    let universe_key = ctx.accounts.universe.key();
+    let release_key = release.key();
+    let final_asset_key = asset.key();
+
+    let mut lineage_assets: Vec<(Pubkey, Pubkey, u16)> = Vec::with_capacity(asset_count);
+    for account_info in remaining.iter().take(asset_count) {
+        let account = Account::<Asset>::try_from(account_info)?;
+        require!(
+            account.universe == universe_key,
+            StellarError::UniverseMismatch
+        );
+        require!(
+            account.status == AssetStatus::Approved
+                || account.status == AssetStatus::Finalized
+                || account.status == AssetStatus::Minted,
+            StellarError::InvalidAssetStatus
+        );
+        require!(
+            !lineage_assets
+                .iter()
+                .any(|(asset_key, _, _)| *asset_key == account.key()),
+            StellarError::InvalidLineageProof
+        );
+        lineage_assets.push((account.key(), account.creator, account.parent_count));
+    }
+
+    require!(
+        lineage_assets
+            .iter()
+            .any(|(asset_key, _, _)| *asset_key == final_asset_key),
+        StellarError::InvalidLineageProof
+    );
+
+    let asset_keys: Vec<Pubkey> = lineage_assets
+        .iter()
+        .map(|(asset_key, _, _)| *asset_key)
+        .collect();
+    let mut lineage_links: Vec<(Pubkey, Pubkey)> = Vec::with_capacity(link_count);
+    for account_info in remaining.iter().skip(asset_count).take(link_count) {
+        let account = Account::<AssetParent>::try_from(account_info)?;
+        require!(
+            asset_keys.contains(&account.child_asset) && asset_keys.contains(&account.parent_asset),
+            StellarError::InvalidLineageLink
+        );
+        lineage_links.push((account.child_asset, account.parent_asset));
+    }
+
+    let mut reachable = vec![final_asset_key];
+    let mut changed = true;
+    while changed {
+        changed = false;
+        for (child_asset, parent_asset) in &lineage_links {
+            if reachable.contains(child_asset) && !reachable.contains(parent_asset) {
+                reachable.push(*parent_asset);
+                changed = true;
+            }
+        }
+    }
+
+    require!(
+        asset_keys
+            .iter()
+            .all(|asset_key| reachable.contains(asset_key)),
+        StellarError::InvalidLineageProof
+    );
+    for (asset_key, _, parent_count) in &lineage_assets {
+        let provided_parent_count = lineage_links
+            .iter()
+            .filter(|(child_asset, _)| child_asset == asset_key)
+            .count();
+        require!(
+            provided_parent_count == *parent_count as usize,
+            StellarError::InvalidLineageProof
+        );
+    }
+
+    let mut contribution_counts: Vec<(Pubkey, u16)> = Vec::new();
+    for (_, creator, _) in &lineage_assets {
+        if let Some((_, count)) = contribution_counts
+            .iter_mut()
+            .find(|(contributor, _)| contributor == creator)
+        {
+            *count = count
+                .checked_add(1)
+                .ok_or(StellarError::NumericalOverflow)?;
+        } else {
+            contribution_counts.push((*creator, 1));
+        }
+    }
+
+    contribution_counts.sort_by_key(|(contributor, _)| *contributor);
+    let contributors: Vec<Pubkey> = contribution_counts
+        .iter()
+        .map(|(contributor, _)| *contributor)
+        .collect();
+    let total_contributions: u32 = contribution_counts
+        .iter()
+        .map(|(_, count)| *count as u32)
+        .sum();
+    require!(
+        !contributors.is_empty()
+            && contributors.len() <= BPS_DENOMINATOR as usize
+            && total_contributions > 0
+            && total_contributions <= BPS_DENOMINATOR as u32,
+        StellarError::InvalidContributorCount
+    );
+
+    let share_accounts_start = asset_count + link_count;
+    require!(
+        remaining.len() == share_accounts_start + contributors.len(),
+        StellarError::InvalidContributorCount
+    );
+
+    let mut allocations: Vec<u16> = Vec::with_capacity(contribution_counts.len());
+    let mut allocated_bps: u16 = 0;
+    let mut remainders: Vec<(usize, u32, Pubkey)> = Vec::with_capacity(contribution_counts.len());
+    for (idx, (contributor, count)) in contribution_counts.iter().enumerate() {
+        let weighted_bps = (*count as u32)
+            .checked_mul(BPS_DENOMINATOR as u32)
+            .ok_or(StellarError::NumericalOverflow)?;
+        let bps = (weighted_bps / total_contributions) as u16;
+        allocated_bps = allocated_bps
+            .checked_add(bps)
+            .ok_or(StellarError::NumericalOverflow)?;
+        allocations.push(bps);
+        remainders.push((idx, weighted_bps % total_contributions, *contributor));
+    }
+
+    let remainder_bps = BPS_DENOMINATOR
+        .checked_sub(allocated_bps)
+        .ok_or(StellarError::NumericalOverflow)?;
+    remainders.sort_by(|a, b| b.1.cmp(&a.1).then_with(|| a.2.cmp(&b.2)));
+    for (idx, _, _) in remainders.into_iter().take(remainder_bps as usize) {
+        allocations[idx] = allocations[idx]
+            .checked_add(1)
+            .ok_or(StellarError::NumericalOverflow)?;
+    }
+
+    let rent = Rent::get()?;
+    let share_space = 8 + ContributorShare::INIT_SPACE;
+    let share_lamports = rent.minimum_balance(share_space);
+
+    for (idx, contributor) in contributors.iter().enumerate() {
+        let share_info = &remaining[share_accounts_start + idx];
+        let (expected_share, bump) = Pubkey::find_program_address(
+            &[SHARE_SEED, release_key.as_ref(), contributor.as_ref()],
+            ctx.program_id,
+        );
+        require_keys_eq!(
+            share_info.key(),
+            expected_share,
+            StellarError::InvalidLineageProof
+        );
+        require!(
+            share_info.lamports() == 0,
+            StellarError::InvalidLineageProof
+        );
+
+        let signer_seeds: &[&[u8]] = &[
+            SHARE_SEED,
+            release_key.as_ref(),
+            contributor.as_ref(),
+            &[bump],
+        ];
+        let create_ix = system_instruction::create_account(
+            &ctx.accounts.owner.key(),
+            &expected_share,
+            share_lamports,
+            share_space as u64,
+            ctx.program_id,
+        );
+        invoke_signed(
+            &create_ix,
+            &[
+                ctx.accounts.owner.to_account_info(),
+                share_info.clone(),
+                ctx.accounts.system_program.to_account_info(),
+            ],
+            &[signer_seeds],
+        )?;
+
+        let bps = allocations[idx];
+        let share = ContributorShare {
+            release: release_key,
+            contributor: *contributor,
+            bps,
+            claimed_lamports: 0,
+            bump,
+        };
+        let mut data = share_info.try_borrow_mut_data()?;
+        let mut data_slice: &mut [u8] = &mut data;
+        share.try_serialize(&mut data_slice)?;
+
+        emit!(ReleaseShareAdded {
+            release: release_key,
+            contributor: *contributor,
+            bps,
+        });
+    }
+
+    let now = Clock::get()?.unix_timestamp;
+    release.status = ReleaseStatus::Finalized;
+    release.distribution_model = CollaborationPolicy::Weighted;
+    release.total_share_bps = BPS_DENOMINATOR;
+    release.finalized_at = now;
+    asset.status = AssetStatus::Finalized;
+    asset.updated_at = now;
+
+    emit!(ReleaseDistributionModelSet {
+        release: release_key,
+        distribution_model: CollaborationPolicy::Weighted,
         contributor_count: contributors.len() as u16,
     });
     emit!(ReleaseStatusChanged {

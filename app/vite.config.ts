@@ -7,6 +7,14 @@ export default defineConfig({
     fs: {
       allow: [searchForWorkspaceRoot(process.cwd())],
     },
+    proxy: {
+      "/rpc": {
+        target: "http://127.0.0.1:8899",
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/rpc/, ""),
+        ws: true,
+      },
+    },
   },
   define: {
     global: "globalThis",

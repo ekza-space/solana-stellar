@@ -7,6 +7,7 @@ pub struct UniverseCreated {
     pub universe: Pubkey,
     pub owner: Pubkey,
     pub index: u64,
+    pub global_index: u64,
 }
 
 #[event]

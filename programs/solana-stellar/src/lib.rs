@@ -54,18 +54,28 @@ pub mod solana_stellar {
         asset_index: u64,
         kind: AssetKind,
         subtype: AssetSubtype,
+        license_kind: LicenseKind,
         metadata_hash: String,
         preview_hash: String,
     ) -> Result<()> {
-        handlers::create_asset(ctx, asset_index, kind, subtype, metadata_hash, preview_hash)
+        handlers::create_asset(
+            ctx,
+            asset_index,
+            kind,
+            subtype,
+            license_kind,
+            metadata_hash,
+            preview_hash,
+        )
     }
 
     pub fn update_asset_metadata(
         ctx: Context<UpdateAssetMetadata>,
+        license_kind: LicenseKind,
         metadata_hash: String,
         preview_hash: String,
     ) -> Result<()> {
-        handlers::update_asset_metadata(ctx, metadata_hash, preview_hash)
+        handlers::update_asset_metadata(ctx, license_kind, metadata_hash, preview_hash)
     }
 
     pub fn add_asset_parent(ctx: Context<AddAssetParent>) -> Result<()> {
@@ -112,6 +122,14 @@ pub mod solana_stellar {
         handlers::finalize_lineage_equal_release(ctx, asset_count, link_count)
     }
 
+    pub fn finalize_weighted_release<'info>(
+        ctx: Context<'_, '_, 'info, 'info, FinalizeLineageEqualRelease<'info>>,
+        asset_count: u16,
+        link_count: u16,
+    ) -> Result<()> {
+        handlers::finalize_weighted_release(ctx, asset_count, link_count)
+    }
+
     pub fn link_avatar_data(ctx: Context<LinkAvatarData>, avatar_data: Pubkey) -> Result<()> {
         handlers::link_avatar_data(ctx, avatar_data)
     }
@@ -122,5 +140,9 @@ pub mod solana_stellar {
 
     pub fn claim_revenue(ctx: Context<ClaimRevenue>) -> Result<()> {
         handlers::claim_revenue(ctx)
+    }
+
+    pub fn claim_revenue_for(ctx: Context<ClaimRevenueFor>) -> Result<()> {
+        handlers::claim_revenue_for(ctx)
     }
 }
