@@ -11,7 +11,14 @@ MAINNET_URL ?= https://api.mainnet-beta.solana.com
 LOCALNET_LEDGER ?= test-ledger
 LOCALNET_BIND_ADDRESS ?= 127.0.0.1
 LOCALNET_RPC_PORT ?= 8899
+LOCALNET_RPC_CORS ?= all
 AIRDROP_SOL ?= 20
+
+RPC_CORS_FLAG := $(shell \
+  if solana-test-validator --help 2>/dev/null | rg -- "--rpc-cors" >/dev/null; then \
+    echo "--rpc-cors \"$(LOCALNET_RPC_CORS)\""; \
+  fi \
+)
 
 EVERYTHING_DIR ?= $(CURDIR)/univerces/everything
 MODEL_COUNT ?= 10
@@ -152,7 +159,7 @@ deploy-mainnet:
 	$(MAKE) CLUSTER=mainnet deploy
 
 localnet:
-	solana-test-validator --ledger "$(LOCALNET_LEDGER)" --bind-address "$(LOCALNET_BIND_ADDRESS)" --rpc-port "$(LOCALNET_RPC_PORT)"
+	solana-test-validator --ledger "$(LOCALNET_LEDGER)" --bind-address "$(LOCALNET_BIND_ADDRESS)" --rpc-port "$(LOCALNET_RPC_PORT)" $(RPC_CORS_FLAG)
 
 metadata-server:
 	node scripts/serve-metadata.js --folder "$(EVERYTHING_DIR)" --port "$(METADATA_PORT)"

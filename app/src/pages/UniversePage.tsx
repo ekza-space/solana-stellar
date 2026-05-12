@@ -2,6 +2,7 @@ import { useState } from "react";
 import * as anchor from "@coral-xyz/anchor";
 
 import { ensureClient, logSignature, useAppState } from "../App";
+import { formatRpcError } from "../lib/errors";
 import { Field, Panel } from "../components/Panel";
 import {
   deriveRegistry,
@@ -58,7 +59,11 @@ export function UniversePage() {
       state.setAddresses((current) => ({ ...current, universe: universe.toBase58() }));
       logSignature(state, "Universe created", signature);
     } catch (error) {
-      state.addLog("error", "Create universe failed", String(error));
+      state.addLog(
+        "error",
+        "Create universe failed",
+        formatRpcError(error, "Could not create universe with current RPC endpoint.")
+      );
     } finally {
       setLoading(false);
     }
@@ -73,7 +78,14 @@ export function UniversePage() {
       state.setAddresses((current) => ({ ...current, universe: universe.toBase58() }));
       state.addLog("success", "Universe fetched", JSON.stringify(account, null, 2));
     } catch (error) {
-      state.addLog("error", "Fetch universe failed", String(error));
+      state.addLog(
+        "error",
+        "Fetch universe failed",
+        formatRpcError(
+          error,
+          "Could not fetch universe account with current RPC endpoint."
+        )
+      );
     } finally {
       setLoading(false);
     }

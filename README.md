@@ -55,6 +55,16 @@ make metadata-server
 make seed-new-single-localnet
 ```
 
+If your browser app shows `NetworkError when attempting to fetch resource` or RPC
+fetch errors during local testing, make sure the UI uses the local Vite proxy:
+
+```sh
+make localnet
+```
+
+The app points localnet RPC through `http://localhost:<app-port>/rpc` and the
+Vite dev server proxies this path to `127.0.0.1:8899`, so RPC calls stay same-origin.
+
 `seed-new-single-localnet` creates a fresh universe and guarantees at least one
 top-level project plus one child 3D model asset inside it. Seeding uses `.glb`
 files by default so each model is a single portable artifact with embedded
