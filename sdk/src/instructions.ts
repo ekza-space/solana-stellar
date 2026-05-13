@@ -370,8 +370,19 @@ export async function finalizeWeightedRelease(
     remainingAccounts: AccountMeta[];
   }
 ) {
-  const signature = await client.program.methods
-    .finalizeWeightedRelease(args.assetCount, args.linkCount)
+  const finalizeWeightedRelease =
+    (client.program.methods as Record<string, any>).finalizeWeightedRelease ||
+    (client.program.methods as Record<string, any>).finalize_weighted_release;
+
+  if (typeof finalizeWeightedRelease !== "function") {
+    throw new Error(
+      "Current Solana Stellar SDK ABI does not expose finalizeWeightedRelease. " +
+        "Sync the local SDK IDL (`make sync-sdk-idl`) and rebuild dependencies before retrying."
+    );
+  }
+
+  const signature = await finalizeWeightedRelease
+    .call(client.program.methods, args.assetCount, args.linkCount)
     .accountsStrict({
       universe: args.universe,
       release: args.release,

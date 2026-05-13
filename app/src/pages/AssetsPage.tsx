@@ -4,7 +4,15 @@ import { PublicKey } from "@solana/web3.js";
 
 import { ensureClient, logSignature, useAppState } from "../App";
 import { Field, Panel } from "../components/Panel";
-import { deriveAsset, deriveAssetParent, enumValue, systemProgram } from "../lib/stellar";
+import {
+  accountExplorerUrl,
+  deriveAsset,
+  deriveAssetParent,
+  enumValue,
+  explorerUrl,
+  solscanAccountUrl,
+  systemProgram,
+} from "../lib/stellar";
 
 export function AssetsPage() {
   const state = useAppState();
@@ -17,12 +25,18 @@ export function AssetsPage() {
   const [loading, setLoading] = useState(false);
 
   const universe = useMemo(
-    () => (state.addresses.universe ? new PublicKey(state.addresses.universe) : null),
-    [state.addresses.universe],
+    () =>
+      state.addresses.universe ? new PublicKey(state.addresses.universe) : null,
+    [state.addresses.universe]
   );
-  const asset = universe ? deriveAsset(universe, Number(assetIndex || "0")) : null;
-  const parentAsset = universe ? deriveAsset(universe, Number(parentIndex || "0")) : null;
-  const link = asset && parentAsset ? deriveAssetParent(asset, parentAsset) : null;
+  const asset = universe
+    ? deriveAsset(universe, Number(assetIndex || "0"))
+    : null;
+  const parentAsset = universe
+    ? deriveAsset(universe, Number(parentIndex || "0"))
+    : null;
+  const link =
+    asset && parentAsset ? deriveAssetParent(asset, parentAsset) : null;
 
   async function createAsset() {
     const client = ensureClient(state);
@@ -36,7 +50,7 @@ export function AssetsPage() {
           enumValue(subtype) as any,
           enumValue("unknown") as any,
           metadataHash,
-          previewHash,
+          previewHash
         )
         .accountsStrict({
           universe,
@@ -48,9 +62,30 @@ export function AssetsPage() {
 
       state.setAddresses((current) => ({
         ...current,
-        [Number(assetIndex) === 0 ? "parentAsset" : "childAsset"]: asset.toBase58(),
+        [Number(assetIndex) === 0 ? "parentAsset" : "childAsset"]:
+          asset.toBase58(),
       }));
-      logSignature(state, "Asset created", signature);
+      const solanaExplorer = accountExplorerUrl(
+        asset.toBase58(),
+        state.endpoint
+      );
+      const solscanExplorer = solscanAccountUrl(
+        asset.toBase58(),
+        state.endpoint
+      );
+      const links = [
+        `Solana Explorer: ${solanaExplorer}`,
+        ...(solscanExplorer ? [`Solscan: ${solscanExplorer}`] : []),
+      ].join("\n");
+
+      state.addLog(
+        "success",
+        "Asset was successfully created!",
+        `Asset: ${asset.toBase58()}\n${links}\nTransaction: ${explorerUrl(
+          signature,
+          state.endpoint
+        )}`
+      );
     } catch (error) {
       state.addLog("error", "Create asset failed", String(error));
     } finally {
@@ -74,7 +109,10 @@ export function AssetsPage() {
         })
         .rpc();
 
-      state.setAddresses((current) => ({ ...current, parentLink: link.toBase58() }));
+      state.setAddresses((current) => ({
+        ...current,
+        parentLink: link.toBase58(),
+      }));
       logSignature(state, "Asset parent linked", signature);
     } catch (error) {
       state.addLog("error", "Add parent failed", String(error));
@@ -122,49 +160,114 @@ export function AssetsPage() {
     if (!client || !asset) return;
     try {
       const account = await client.program.account.asset.fetch(asset);
-      state.addLog("success", "Asset fetched", JSON.stringify(account, null, 2));
+      state.addLog(
+        "success",
+        "Asset fetched",
+        JSON.stringify(account, null, 2)
+      );
     } catch (error) {
       state.addLog("error", "Fetch asset failed", String(error));
     }
   }
 
   return (
-    <Panel title="Assets" description="Create, link, submit, and approve protocol assets.">
+    <Panel
+      title="Assets"
+      description="Create, link, submit, and approve protocol assets."
+    >
       <div className="form-grid">
         <Field label="Asset index">
-          <input value={assetIndex} onChange={(event) => setAssetIndex(event.target.value)} />
+          <input
+            value={assetIndex}
+            onChange={(event) => setAssetIndex(event.target.value)}
+          />
         </Field>
         <Field label="Parent index">
-          <input value={parentIndex} onChange={(event) => setParentIndex(event.target.value)} />
+          <input
+            value={parentIndex}
+            onChange={(event) => setParentIndex(event.target.value)}
+          />
         </Field>
         <Field label="Kind">
-          <select value={kind} onChange={(event) => setKind(event.target.value)}>
-            {["Image", "Model3d", "Animation", "Audio", "Script", "Metadata", "Other"].map((item) => (
+          <select
+            value={kind}
+            onChange={(event) => setKind(event.target.value)}
+          >
+            {[
+              "Image",
+              "Model3d",
+              "Animation",
+              "Audio",
+              "Script",
+              "Metadata",
+              "Other",
+            ].map((item) => (
               <option key={item}>{item}</option>
             ))}
           </select>
         </Field>
         <Field label="Subtype">
-          <select value={subtype} onChange={(event) => setSubtype(event.target.value)}>
-            {["Concept", "Sketch", "Texture", "Mesh", "Rig", "Motion", "Preview", "Final", "Other"].map((item) => (
+          <select
+            value={subtype}
+            onChange={(event) => setSubtype(event.target.value)}
+          >
+            {[
+              "Concept",
+              "Sketch",
+              "Texture",
+              "Mesh",
+              "Rig",
+              "Motion",
+              "Preview",
+              "Final",
+              "Other",
+            ].map((item) => (
               <option key={item}>{item}</option>
             ))}
           </select>
         </Field>
         <Field label="Metadata hash">
-          <input value={metadataHash} onChange={(event) => setMetadataHash(event.target.value)} />
+          <input
+            value={metadataHash}
+            onChange={(event) => setMetadataHash(event.target.value)}
+          />
         </Field>
         <Field label="Preview hash">
-          <input value={previewHash} onChange={(event) => setPreviewHash(event.target.value)} />
+          <input
+            value={previewHash}
+            onChange={(event) => setPreviewHash(event.target.value)}
+          />
         </Field>
       </div>
 
       <div className="actions">
-        <button disabled={loading || !universe} onClick={createAsset}>Create Asset</button>
-        <button className="secondary" disabled={loading || !asset} onClick={addParent}>Add Parent Link</button>
-        <button className="secondary" disabled={loading || !asset} onClick={submitAsset}>Submit</button>
-        <button className="secondary" disabled={loading || !asset} onClick={approveAsset}>Approve</button>
-        <button className="secondary" disabled={!asset} onClick={fetchAsset}>Fetch</button>
+        <button disabled={loading || !universe} onClick={createAsset}>
+          Create Asset
+        </button>
+        <button
+          className="secondary"
+          disabled={loading || !asset}
+          onClick={addParent}
+        >
+          Add Parent Link
+        </button>
+        <button
+          className="secondary"
+          disabled={loading || !asset}
+          onClick={submitAsset}
+        >
+          Submit
+        </button>
+        <button
+          className="secondary"
+          disabled={loading || !asset}
+          onClick={approveAsset}
+        >
+          Approve
+        </button>
+        <button className="secondary" disabled={!asset} onClick={fetchAsset}>
+          Fetch
+        </button>
       </div>
 
       {asset ? (

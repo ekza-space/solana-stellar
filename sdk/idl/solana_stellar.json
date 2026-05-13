@@ -973,16 +973,21 @@
     },
     {
       "code": 6021,
+      "name": "InsufficientVaultBalanceForClaim",
+      "msg": "Release vault balance is below required reserve for claims."
+    },
+    {
+      "code": 6022,
       "name": "NoRevenueToClaim",
       "msg": "No revenue available to claim."
     },
     {
-      "code": 6022,
+      "code": 6023,
       "name": "InsufficientVaultBalance",
       "msg": "Release vault balance is insufficient."
     },
     {
-      "code": 6023,
+      "code": 6024,
       "name": "NumericalOverflow",
       "msg": "Numerical overflow occurred."
     }

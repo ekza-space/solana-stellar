@@ -1039,16 +1039,21 @@ export type SolanaStellar = {
     },
     {
       code: 6021;
+      name: "insufficientVaultBalanceForClaim";
+      msg: "Release vault balance is below required reserve for claims.";
+    },
+    {
+      code: 6022;
       name: "noRevenueToClaim";
       msg: "No revenue available to claim.";
     },
     {
-      code: 6022;
+      code: 6023;
       name: "insufficientVaultBalance";
       msg: "Release vault balance is insufficient.";
     },
     {
-      code: 6023;
+      code: 6024;
       name: "numericalOverflow";
       msg: "Numerical overflow occurred.";
     }
