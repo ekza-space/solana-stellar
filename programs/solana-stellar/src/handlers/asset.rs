@@ -6,7 +6,9 @@ use crate::{
     },
     error::StellarError,
     events::{AssetCreated, AssetParentAdded, AssetStatusChanged},
-    state::{AssetKind, AssetStatus, AssetSubtype, LicenseKind, UniverseStatus},
+    state::{
+        AssetKind, AssetStatus, AssetSubtype, CollaborationPolicy, LicenseKind, UniverseStatus,
+    },
     utils::{validate_hash, validate_optional_hash},
 };
 
@@ -18,6 +20,8 @@ pub fn create_asset(
     license_kind: LicenseKind,
     metadata_hash: String,
     preview_hash: String,
+    open: bool,
+    collaboration_policy: CollaborationPolicy,
 ) -> Result<()> {
     validate_hash(&metadata_hash)?;
     validate_optional_hash(&preview_hash)?;
@@ -51,6 +55,8 @@ pub fn create_asset(
     asset.subtype = subtype;
     asset.license_kind = license_kind;
     asset.status = AssetStatus::Draft;
+    asset.open = open;
+    asset.collaboration_policy = collaboration_policy;
     asset.metadata_hash = metadata_hash;
     asset.preview_hash = preview_hash;
     asset.created_at = now;
@@ -78,6 +84,8 @@ pub fn update_asset_metadata(
     license_kind: LicenseKind,
     metadata_hash: String,
     preview_hash: String,
+    open: bool,
+    collaboration_policy: CollaborationPolicy,
 ) -> Result<()> {
     validate_hash(&metadata_hash)?;
     validate_optional_hash(&preview_hash)?;
@@ -87,10 +95,15 @@ pub fn update_asset_metadata(
         asset.status == AssetStatus::Draft,
         StellarError::AssetLocked
     );
+    require!(
+        asset.collaboration_policy == collaboration_policy,
+        StellarError::ImmutableCollaborationPolicy
+    );
 
     asset.metadata_hash = metadata_hash;
     asset.preview_hash = preview_hash;
     asset.license_kind = license_kind;
+    asset.open = open;
     asset.updated_at = Clock::get()?.unix_timestamp;
 
     Ok(())
@@ -112,6 +125,10 @@ pub fn add_asset_parent(ctx: Context<AddAssetParent>) -> Result<()> {
     require!(
         child.key() != parent.key(),
         StellarError::InvalidLineageLink
+    );
+    require!(
+        parent.open || parent.creator == ctx.accounts.creator.key(),
+        StellarError::AssetClosed
     );
 
     let child_key = child.key();

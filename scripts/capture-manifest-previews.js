@@ -4,7 +4,11 @@ const fs = require("node:fs");
 const path = require("node:path");
 const anchor = require("@coral-xyz/anchor");
 const { Connection, Keypair } = require("@solana/web3.js");
-const { createClient, enumValue, updateAssetMetadata } = require("../sdk/dist/src");
+const {
+  createClient,
+  enumValue,
+  updateAssetMetadata,
+} = require("../sdk/dist/src");
 
 const DEFAULT_FOLDER = path.resolve(__dirname, "../univerces/everything");
 const DEFAULT_ENDPOINT = "http://127.0.0.1:8899";
@@ -104,7 +108,9 @@ function previewUrl(previewFile, folder, metadataBaseUrl) {
 }
 
 function loadKeypair(filePath) {
-  const secretKey = Uint8Array.from(JSON.parse(fs.readFileSync(filePath, "utf8")));
+  const secretKey = Uint8Array.from(
+    JSON.parse(fs.readFileSync(filePath, "utf8"))
+  );
   return Keypair.fromSecretKey(secretKey);
 }
 
@@ -139,10 +145,14 @@ async function main() {
   const owner = fs.existsSync(keypairPath) ? loadKeypair(keypairPath) : null;
   const client =
     owner && args.updateChainPreview
-      ? createClient(new Connection(args.endpoint, "confirmed"), new anchor.Wallet(owner), {
-          commitment: "processed",
-          preflightCommitment: "processed",
-        })
+      ? createClient(
+          new Connection(args.endpoint, "confirmed"),
+          new anchor.Wallet(owner),
+          {
+            commitment: "processed",
+            preflightCommitment: "processed",
+          }
+        )
       : null;
 
   const { chromium } = requirePlaywright();
@@ -221,13 +231,15 @@ async function main() {
           metadataHash: asset.metadataHash,
           previewHash: urlForMetadata,
         });
-        asset.modelAssetPreviewUpdateSignature = await updatePreviewHashOnChain({
-          client,
-          owner,
-          assetAddress: asset.modelAssetAddress,
-          metadataHash: asset.modelAssetMetadataHash,
-          previewHash: urlForMetadata,
-        });
+        asset.modelAssetPreviewUpdateSignature = await updatePreviewHashOnChain(
+          {
+            client,
+            owner,
+            assetAddress: asset.modelAssetAddress,
+            metadataHash: asset.modelAssetMetadataHash,
+            previewHash: urlForMetadata,
+          }
+        );
       }
       captured.push({ title: asset.title, url: urlForMetadata });
     } catch (error) {

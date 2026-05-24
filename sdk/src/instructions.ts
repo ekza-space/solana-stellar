@@ -16,6 +16,7 @@ import {
 import { toNumber } from "./utils";
 
 type EnumArg = Record<string, Record<string, never>>;
+const defaultCollaborationPolicy = (): EnumArg => ({ custom: {} });
 
 export async function nextUniverseIndex(
   client: StellarClient,
@@ -39,8 +40,7 @@ export async function createUniverse(
     universeIndex: number;
     metadataHash: string;
     projectType: EnumArg;
-    collaborationPolicy: EnumArg;
-    open: boolean;
+    open?: boolean;
   }
 ) {
   const registry = deriveRegistry();
@@ -56,8 +56,7 @@ export async function createUniverse(
       new anchor.BN(args.universeIndex),
       args.metadataHash,
       args.projectType as any,
-      args.collaborationPolicy as any,
-      args.open
+      args.open ?? true
     )
     .accountsStrict({
       registry,
@@ -77,15 +76,17 @@ export async function updateUniverse(
     universe: PublicKey;
     owner: PublicKey;
     metadataHash: string;
-    open: boolean;
-    collaborationPolicy: EnumArg;
+    open?: boolean;
   }
 ) {
+  const current =
+    args.open === undefined
+      ? ((await client.program.account.universe.fetch(args.universe)) as any)
+      : null;
   const signature = await client.program.methods
     .updateUniverse(
       args.metadataHash,
-      args.open,
-      args.collaborationPolicy as any
+      args.open ?? Boolean(current?.open ?? true)
     )
     .accountsStrict({
       universe: args.universe,
@@ -122,6 +123,8 @@ export async function createAsset(
     licenseKind: EnumArg;
     metadataHash: string;
     previewHash: string;
+    open?: boolean;
+    collaborationPolicy?: EnumArg;
   }
 ) {
   const asset = deriveAsset(args.universe, args.assetIndex);
@@ -132,7 +135,9 @@ export async function createAsset(
       args.subtype as any,
       args.licenseKind as any,
       args.metadataHash,
-      args.previewHash
+      args.previewHash,
+      args.open ?? true,
+      (args.collaborationPolicy ?? defaultCollaborationPolicy()) as any
     )
     .accountsStrict({
       universe: args.universe,
@@ -153,13 +158,23 @@ export async function updateAssetMetadata(
     licenseKind: EnumArg;
     metadataHash: string;
     previewHash: string;
+    open?: boolean;
+    collaborationPolicy?: EnumArg;
   }
 ) {
+  const current =
+    args.open === undefined || args.collaborationPolicy === undefined
+      ? ((await client.program.account.asset.fetch(args.asset)) as any)
+      : null;
   const signature = await client.program.methods
     .updateAssetMetadata(
       args.licenseKind as any,
       args.metadataHash,
-      args.previewHash
+      args.previewHash,
+      args.open ?? Boolean(current?.open ?? true),
+      (args.collaborationPolicy ??
+        current?.collaborationPolicy ??
+        defaultCollaborationPolicy()) as any
     )
     .accountsStrict({ asset: args.asset, creator: args.creator })
     .rpc();

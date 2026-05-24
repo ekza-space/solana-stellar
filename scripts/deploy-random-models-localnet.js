@@ -34,11 +34,13 @@ const EVERYTHING_LIBRARY_ATTRIBUTION = {
   license: "CC BY 4.0",
   licenseUrl: "https://creativecommons.org/licenses/by/4.0/",
   libraryLicenseUrl: "http://davidoreilly.com/library",
-  creativeLicense: "Creative Commons Attribution 4.0 International License (CC BY 4.0)",
+  creativeLicense:
+    "Creative Commons Attribution 4.0 International License (CC BY 4.0)",
   softwareLicense: "MIT License",
   releasedAt: "2020-06-21",
   modified: false,
-  modificationNote: "No model geometry, texture, rig, or animation changes were made by this seeding script.",
+  modificationNote:
+    "No model geometry, texture, rig, or animation changes were made by this seeding script.",
   note: "Original assets from the Everything Library ANIMALS pack. Attribution and license notice should be preserved in copies and derivatives.",
 };
 const EVERYTHING_LIBRARY_LICENSE_KIND = "ccBy4";
@@ -188,7 +190,8 @@ function findPreviewFile(folder, title) {
       .readdirSync(previewsDir)
       .find((file) => new RegExp(`-${escapedTitle}\\.png$`).test(file));
 
-    if (previewFile) return path.join(SERVICE_DIR_NAME, "previews", previewFile);
+    if (previewFile)
+      return path.join(SERVICE_DIR_NAME, "previews", previewFile);
   }
 
   return null;
@@ -282,7 +285,6 @@ async function createFreshUniverse({
     universeIndex,
     metadataHash: universeMetadataHash,
     projectType: enumValue("model3D"),
-    collaborationPolicy: enumValue("custom"),
     open: true,
   });
   await waitForAccount(client.connection, universe, "universe");

@@ -605,7 +605,6 @@ async function createFreshUniverse({
     universeIndex,
     metadataHash: universeMetadataHash,
     projectType: enumValue("metadata"),
-    collaborationPolicy: enumValue("custom"),
     open: plan.universe.open !== false,
   });
   await waitForAccount(client.connection, universe, "universe");

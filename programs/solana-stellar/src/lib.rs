@@ -23,26 +23,17 @@ pub mod solana_stellar {
         universe_index: u64,
         metadata_hash: String,
         project_type: AssetKind,
-        collaboration_policy: CollaborationPolicy,
         open: bool,
     ) -> Result<()> {
-        handlers::create_universe(
-            ctx,
-            universe_index,
-            metadata_hash,
-            project_type,
-            collaboration_policy,
-            open,
-        )
+        handlers::create_universe(ctx, universe_index, metadata_hash, project_type, open)
     }
 
     pub fn update_universe(
         ctx: Context<UpdateUniverse>,
         metadata_hash: String,
         open: bool,
-        collaboration_policy: CollaborationPolicy,
     ) -> Result<()> {
-        handlers::update_universe(ctx, metadata_hash, open, collaboration_policy)
+        handlers::update_universe(ctx, metadata_hash, open)
     }
 
     pub fn close_universe(ctx: Context<CloseUniverse>) -> Result<()> {
@@ -57,6 +48,8 @@ pub mod solana_stellar {
         license_kind: LicenseKind,
         metadata_hash: String,
         preview_hash: String,
+        open: bool,
+        collaboration_policy: CollaborationPolicy,
     ) -> Result<()> {
         handlers::create_asset(
             ctx,
@@ -66,6 +59,8 @@ pub mod solana_stellar {
             license_kind,
             metadata_hash,
             preview_hash,
+            open,
+            collaboration_policy,
         )
     }
 
@@ -74,8 +69,17 @@ pub mod solana_stellar {
         license_kind: LicenseKind,
         metadata_hash: String,
         preview_hash: String,
+        open: bool,
+        collaboration_policy: CollaborationPolicy,
     ) -> Result<()> {
-        handlers::update_asset_metadata(ctx, license_kind, metadata_hash, preview_hash)
+        handlers::update_asset_metadata(
+            ctx,
+            license_kind,
+            metadata_hash,
+            preview_hash,
+            open,
+            collaboration_policy,
+        )
     }
 
     pub fn add_asset_parent(ctx: Context<AddAssetParent>) -> Result<()> {

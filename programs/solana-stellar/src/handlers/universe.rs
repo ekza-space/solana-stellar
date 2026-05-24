@@ -4,7 +4,7 @@ use crate::{
     contexts::{CloseUniverse, CreateUniverse, UpdateUniverse},
     error::StellarError,
     events::{UniverseCreated, UniverseUpdated},
-    state::{AssetKind, CollaborationPolicy, UniverseStatus},
+    state::{AssetKind, UniverseStatus},
     utils::validate_hash,
 };
 
@@ -13,7 +13,6 @@ pub fn create_universe(
     universe_index: u64,
     metadata_hash: String,
     project_type: AssetKind,
-    collaboration_policy: CollaborationPolicy,
     open: bool,
 ) -> Result<()> {
     validate_hash(&metadata_hash)?;
@@ -35,7 +34,6 @@ pub fn create_universe(
     universe.open = open;
     universe.status = UniverseStatus::Active;
     universe.project_type = project_type;
-    universe.collaboration_policy = collaboration_policy;
     universe.metadata_hash = metadata_hash;
     universe.created_at = now;
     universe.updated_at = now;
@@ -66,15 +64,10 @@ pub fn update_universe(
     ctx: Context<UpdateUniverse>,
     metadata_hash: String,
     open: bool,
-    collaboration_policy: CollaborationPolicy,
 ) -> Result<()> {
     validate_hash(&metadata_hash)?;
 
     let universe = &mut ctx.accounts.universe;
-    require!(
-        universe.collaboration_policy == collaboration_policy,
-        StellarError::ImmutableCollaborationPolicy
-    );
     universe.metadata_hash = metadata_hash;
     universe.open = open;
     universe.updated_at = Clock::get()?.unix_timestamp;

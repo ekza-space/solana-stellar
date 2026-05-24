@@ -374,6 +374,18 @@ export type SolanaStellar = {
         {
           name: "previewHash";
           type: "string";
+        },
+        {
+          name: "open";
+          type: "bool";
+        },
+        {
+          name: "collaborationPolicy";
+          type: {
+            defined: {
+              name: "collaborationPolicy";
+            };
+          };
         }
       ];
     },
@@ -552,14 +564,6 @@ export type SolanaStellar = {
           type: {
             defined: {
               name: "assetKind";
-            };
-          };
-        },
-        {
-          name: "collaborationPolicy";
-          type: {
-            defined: {
-              name: "collaborationPolicy";
             };
           };
         },
@@ -810,6 +814,18 @@ export type SolanaStellar = {
         {
           name: "previewHash";
           type: "string";
+        },
+        {
+          name: "open";
+          type: "bool";
+        },
+        {
+          name: "collaborationPolicy";
+          type: {
+            defined: {
+              name: "collaborationPolicy";
+            };
+          };
         }
       ];
     },
@@ -835,14 +851,6 @@ export type SolanaStellar = {
         {
           name: "open";
           type: "bool";
-        },
-        {
-          name: "collaborationPolicy";
-          type: {
-            defined: {
-              name: "collaborationPolicy";
-            };
-          };
         }
       ];
     }
@@ -944,116 +952,121 @@ export type SolanaStellar = {
     },
     {
       code: 6002;
+      name: "assetClosed";
+      msg: "Asset is closed to public collaboration.";
+    },
+    {
+      code: 6003;
       name: "universeNotActive";
       msg: "Universe is not active.";
     },
     {
-      code: 6003;
+      code: 6004;
       name: "universeNotEmpty";
       msg: "Universe still has live assets or releases.";
     },
     {
-      code: 6004;
+      code: 6005;
       name: "invalidHash";
       msg: "Invalid metadata or content hash.";
     },
     {
-      code: 6005;
+      code: 6006;
       name: "invalidAssetIndex";
       msg: "Invalid asset index.";
     },
     {
-      code: 6006;
+      code: 6007;
       name: "invalidReleaseIndex";
       msg: "Invalid release index.";
     },
     {
-      code: 6007;
+      code: 6008;
       name: "assetLocked";
       msg: "Asset is locked for this operation.";
     },
     {
-      code: 6008;
+      code: 6009;
       name: "invalidAssetStatus";
       msg: "Invalid asset status for this operation.";
     },
     {
-      code: 6009;
+      code: 6010;
       name: "universeMismatch";
       msg: "Universe mismatch.";
     },
     {
-      code: 6010;
+      code: 6011;
       name: "assetMismatch";
       msg: "Asset mismatch.";
     },
     {
-      code: 6011;
+      code: 6012;
       name: "releaseMismatch";
       msg: "Release mismatch.";
     },
     {
-      code: 6012;
+      code: 6013;
       name: "invalidLineageLink";
       msg: "Invalid lineage link.";
     },
     {
-      code: 6013;
+      code: 6014;
       name: "invalidLineageProof";
       msg: "Invalid lineage proof.";
     },
     {
-      code: 6014;
+      code: 6015;
       name: "invalidContributorCount";
       msg: "Invalid contributor count.";
     },
     {
-      code: 6015;
+      code: 6016;
       name: "releaseLocked";
       msg: "Release is locked for this operation.";
     },
     {
-      code: 6016;
+      code: 6017;
       name: "releaseNotFinalized";
       msg: "Release is not finalized.";
     },
     {
-      code: 6017;
+      code: 6018;
       name: "invalidShareBps";
       msg: "Invalid contributor share basis points.";
     },
     {
-      code: 6018;
+      code: 6019;
       name: "invalidDistributionModel";
       msg: "Invalid release distribution model for this operation.";
     },
     {
-      code: 6019;
+      code: 6020;
       name: "immutableCollaborationPolicy";
-      msg: "Collaboration policy is immutable after universe creation.";
+      msg: "Collaboration policy is immutable after asset creation.";
     },
     {
-      code: 6020;
+      code: 6021;
       name: "invalidRevenueAmount";
       msg: "Invalid revenue amount.";
     },
     {
-      code: 6021;
+      code: 6022;
       name: "insufficientVaultBalanceForClaim";
       msg: "Release vault balance is below required reserve for claims.";
     },
     {
-      code: 6022;
+      code: 6023;
       name: "noRevenueToClaim";
       msg: "No revenue available to claim.";
     },
     {
-      code: 6023;
+      code: 6024;
       name: "insufficientVaultBalance";
       msg: "Release vault balance is insufficient.";
     },
     {
-      code: 6024;
+      code: 6025;
       name: "numericalOverflow";
       msg: "Numerical overflow occurred.";
     }
@@ -1113,6 +1126,21 @@ export type SolanaStellar = {
             type: {
               defined: {
                 name: "assetStatus";
+              };
+            };
+          },
+          {
+            name: "open";
+            type: "bool";
+          },
+          {
+            name: "collaborationPolicy";
+            docs: [
+              "Revenue distribution policy used when this asset is finalized as a release."
+            ];
+            type: {
+              defined: {
+                name: "collaborationPolicy";
               };
             };
           },
@@ -1721,19 +1749,6 @@ export type SolanaStellar = {
             type: {
               defined: {
                 name: "assetKind";
-              };
-            };
-          },
-          {
-            name: "collaborationPolicy";
-            docs: [
-              "Revenue distribution policy used for releases in this universe.",
-              "It is immutable after universe creation so admins cannot alter the",
-              "economic deal that contributors relied on when joining."
-            ];
-            type: {
-              defined: {
-                name: "collaborationPolicy";
               };
             };
           },

@@ -36,7 +36,10 @@ export function createClient(
 export function explorerUrl(signature: string, endpoint: string) {
   const resolvedEndpoint = endpointForExplorer(endpoint);
   const cluster = endpoint.includes("devnet") ? "devnet" : "custom";
-  if (resolvedEndpoint.includes("127.0.0.1") || resolvedEndpoint.includes("localhost")) {
+  if (
+    resolvedEndpoint.includes("127.0.0.1") ||
+    resolvedEndpoint.includes("localhost")
+  ) {
     return `https://explorer.solana.com/tx/${signature}?cluster=custom&customUrl=${encodeURIComponent(
       resolvedEndpoint
     )}`;
@@ -47,7 +50,10 @@ export function explorerUrl(signature: string, endpoint: string) {
 export function accountExplorerUrl(address: string, endpoint: string) {
   const resolvedEndpoint = endpointForExplorer(endpoint);
   const cluster = endpoint.includes("devnet") ? "devnet" : "custom";
-  if (resolvedEndpoint.includes("127.0.0.1") || resolvedEndpoint.includes("localhost")) {
+  if (
+    resolvedEndpoint.includes("127.0.0.1") ||
+    resolvedEndpoint.includes("localhost")
+  ) {
     return `https://explorer.solana.com/address/${address}?cluster=custom&customUrl=${encodeURIComponent(
       resolvedEndpoint
     )}`;
@@ -56,9 +62,12 @@ export function accountExplorerUrl(address: string, endpoint: string) {
 }
 
 export function solscanAccountUrl(address: string, endpoint: string) {
-  if (endpoint.includes("devnet")) return `https://solscan.io/account/${address}?cluster=devnet`;
-  if (endpoint.includes("testnet")) return `https://solscan.io/account/${address}?cluster=testnet`;
-  if (endpoint.includes("localhost") || endpoint.includes("127.0.0.1")) return null;
+  if (endpoint.includes("devnet"))
+    return `https://solscan.io/account/${address}?cluster=devnet`;
+  if (endpoint.includes("testnet"))
+    return `https://solscan.io/account/${address}?cluster=testnet`;
+  if (endpoint.includes("localhost") || endpoint.includes("127.0.0.1"))
+    return null;
   return `https://solscan.io/account/${address}`;
 }
 
@@ -100,7 +109,10 @@ export function deriveUniverse(owner: PublicKey, index: number) {
 }
 
 export function deriveRegistry() {
-  return PublicKey.findProgramAddressSync([Buffer.from("registry")], PROGRAM_ID)[0];
+  return PublicKey.findProgramAddressSync(
+    [Buffer.from("registry")],
+    PROGRAM_ID
+  )[0];
 }
 
 export function deriveUniverseIndex(globalIndex: number) {

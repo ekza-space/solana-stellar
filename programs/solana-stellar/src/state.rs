@@ -36,18 +36,13 @@ pub struct Universe {
     pub open: bool,
     pub status: UniverseStatus,
     pub project_type: AssetKind,
-    /// Revenue distribution policy used for releases in this universe.
-    /// It is immutable after universe creation so admins cannot alter the
-    /// economic deal that contributors relied on when joining.
-    pub collaboration_policy: CollaborationPolicy,
     pub metadata_hash: String,
     pub created_at: i64,
     pub updated_at: i64,
 }
 
 impl Universe {
-    pub const INIT_SPACE: usize =
-        32 + 8 + 8 + 1 + 8 + 8 + 1 + 1 + 1 + 1 + (4 + MAX_HASH_LEN) + 8 + 8;
+    pub const INIT_SPACE: usize = 32 + 8 + 8 + 1 + 8 + 8 + 1 + 1 + 1 + (4 + MAX_HASH_LEN) + 8 + 8;
 }
 
 #[account]
@@ -61,6 +56,9 @@ pub struct Asset {
     pub subtype: AssetSubtype,
     pub license_kind: LicenseKind,
     pub status: AssetStatus,
+    pub open: bool,
+    /// Revenue distribution policy used when this asset is finalized as a release.
+    pub collaboration_policy: CollaborationPolicy,
     pub metadata_hash: String,
     pub preview_hash: String,
     pub created_at: i64,
@@ -69,8 +67,22 @@ pub struct Asset {
 }
 
 impl Asset {
-    pub const INIT_SPACE: usize =
-        32 + 8 + 32 + 32 + 1 + 1 + 1 + 1 + 1 + (4 + MAX_HASH_LEN) + (4 + MAX_HASH_LEN) + 8 + 8 + 2;
+    pub const INIT_SPACE: usize = 32
+        + 8
+        + 32
+        + 32
+        + 1
+        + 1
+        + 1
+        + 1
+        + 1
+        + 1
+        + 1
+        + (4 + MAX_HASH_LEN)
+        + (4 + MAX_HASH_LEN)
+        + 8
+        + 8
+        + 2;
 }
 
 #[account]

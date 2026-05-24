@@ -22,6 +22,8 @@ export function AssetsPage() {
   const [previewHash, setPreviewHash] = useState("QmAssetPreviewHash");
   const [kind, setKind] = useState("Image");
   const [subtype, setSubtype] = useState("Concept");
+  const [open, setOpen] = useState(true);
+  const [collaborationPolicy, setCollaborationPolicy] = useState("Custom");
   const [loading, setLoading] = useState(false);
 
   const universe = useMemo(
@@ -50,7 +52,9 @@ export function AssetsPage() {
           enumValue(subtype) as any,
           enumValue("unknown") as any,
           metadataHash,
-          previewHash
+          previewHash,
+          open,
+          enumValue(collaborationPolicy) as any
         )
         .accountsStrict({
           universe,
@@ -238,6 +242,24 @@ export function AssetsPage() {
             onChange={(event) => setPreviewHash(event.target.value)}
           />
         </Field>
+        <Field label="Collaboration policy">
+          <select
+            value={collaborationPolicy}
+            onChange={(event) => setCollaborationPolicy(event.target.value)}
+          >
+            {["Custom", "Weighted", "LineageEqual", "Equal"].map((item) => (
+              <option key={item}>{item}</option>
+            ))}
+          </select>
+        </Field>
+        <label className="toggle">
+          <input
+            checked={open}
+            type="checkbox"
+            onChange={(event) => setOpen(event.target.checked)}
+          />
+          Open for collaboration
+        </label>
       </div>
 
       <div className="actions">

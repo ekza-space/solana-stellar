@@ -6,6 +6,8 @@ pub enum StellarError {
     Unauthorized,
     #[msg("Universe is closed to public collaboration.")]
     UniverseClosed,
+    #[msg("Asset is closed to public collaboration.")]
+    AssetClosed,
     #[msg("Universe is not active.")]
     UniverseNotActive,
     #[msg("Universe still has live assets or releases.")]
@@ -40,7 +42,7 @@ pub enum StellarError {
     InvalidShareBps,
     #[msg("Invalid release distribution model for this operation.")]
     InvalidDistributionModel,
-    #[msg("Collaboration policy is immutable after universe creation.")]
+    #[msg("Collaboration policy is immutable after asset creation.")]
     ImmutableCollaborationPolicy,
     #[msg("Invalid revenue amount.")]
     InvalidRevenueAmount,

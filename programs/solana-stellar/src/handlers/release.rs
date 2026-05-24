@@ -61,7 +61,7 @@ pub fn create_release(
     release.index = release_index;
     release.authority = ctx.accounts.owner.key();
     release.status = ReleaseStatus::Draft;
-    release.distribution_model = universe.collaboration_policy;
+    release.distribution_model = asset.collaboration_policy;
     release.metadata_hash = metadata_hash;
     release.total_share_bps = 0;
     release.total_deposited_lamports = 0;

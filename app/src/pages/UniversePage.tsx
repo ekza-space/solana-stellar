@@ -33,7 +33,9 @@ export function UniversePage() {
     setLoading(true);
     try {
       const registry = deriveRegistry();
-      const registryAccount = await client.provider.connection.getAccountInfo(registry);
+      const registryAccount = await client.provider.connection.getAccountInfo(
+        registry
+      );
       const registryData = registryAccount
         ? await client.program.account.registry.fetch(registry)
         : null;
@@ -46,8 +48,7 @@ export function UniversePage() {
           new anchor.BN(universeIndex),
           metadataHash,
           enumValue("Model3d") as any,
-          enumValue("Custom") as any,
-          open,
+          open
         )
         .accountsStrict({
           registry,
@@ -58,13 +59,19 @@ export function UniversePage() {
         })
         .rpc();
 
-      state.setAddresses((current) => ({ ...current, universe: universe.toBase58() }));
+      state.setAddresses((current) => ({
+        ...current,
+        universe: universe.toBase58(),
+      }));
       logSignature(state, "Universe created", signature);
     } catch (error) {
       state.addLog(
         "error",
         "Create universe failed",
-        formatRpcError(error, "Could not create universe with current RPC endpoint.")
+        formatRpcError(
+          error,
+          "Could not create universe with current RPC endpoint."
+        )
       );
     } finally {
       setLoading(false);
@@ -77,8 +84,15 @@ export function UniversePage() {
     setLoading(true);
     try {
       const account = await client.program.account.universe.fetch(universe);
-      state.setAddresses((current) => ({ ...current, universe: universe.toBase58() }));
-      state.addLog("success", "Universe fetched", JSON.stringify(account, null, 2));
+      state.setAddresses((current) => ({
+        ...current,
+        universe: universe.toBase58(),
+      }));
+      state.addLog(
+        "success",
+        "Universe fetched",
+        JSON.stringify(account, null, 2)
+      );
     } catch (error) {
       state.addLog(
         "error",
@@ -100,45 +114,67 @@ export function UniversePage() {
     >
       <div className="form-grid">
         <Field label="Universe index">
-          <input value={index} onChange={(event) => setIndex(event.target.value)} inputMode="numeric" />
+          <input
+            value={index}
+            onChange={(event) => setIndex(event.target.value)}
+            inputMode="numeric"
+          />
         </Field>
         <Field label="Metadata hash">
-          <input value={metadataHash} onChange={(event) => setMetadataHash(event.target.value)} />
+          <input
+            value={metadataHash}
+            onChange={(event) => setMetadataHash(event.target.value)}
+          />
         </Field>
         <label className="toggle">
-          <input checked={open} type="checkbox" onChange={(event) => setOpen(event.target.checked)} />
+          <input
+            checked={open}
+            type="checkbox"
+            onChange={(event) => setOpen(event.target.checked)}
+          />
           Open collaboration
         </label>
       </div>
 
       <div className="actions">
-        <button disabled={loading || !state.walletPublicKey} onClick={createUniverse}>
+        <button
+          disabled={loading || !state.walletPublicKey}
+          onClick={createUniverse}
+        >
           Create Universe
         </button>
-        <button className="secondary" disabled={loading || !state.walletPublicKey} onClick={fetchUniverse}>
+        <button
+          className="secondary"
+          disabled={loading || !state.walletPublicKey}
+          onClick={fetchUniverse}
+        >
           Fetch Universe
         </button>
       </div>
 
       {universe ? (
-      <div className="derived">
-        <span>Derived universe PDA</span>
-        <code>{universe.toBase58()}</code>
-        <div className="links">
-          <a href={accountExplorerUrl(universe.toBase58(), state.endpoint)} target="_blank" rel="noreferrer">
-            Open in Solana Explorer
-          </a>
-          {solscanAccountUrl(universe.toBase58(), state.endpoint) ? (
+        <div className="derived">
+          <span>Derived universe PDA</span>
+          <code>{universe.toBase58()}</code>
+          <div className="links">
             <a
-              href={solscanAccountUrl(universe.toBase58(), state.endpoint)!}
+              href={accountExplorerUrl(universe.toBase58(), state.endpoint)}
               target="_blank"
               rel="noreferrer"
             >
-              Open in Solscan
+              Open in Solana Explorer
             </a>
-          ) : null}
+            {solscanAccountUrl(universe.toBase58(), state.endpoint) ? (
+              <a
+                href={solscanAccountUrl(universe.toBase58(), state.endpoint)!}
+                target="_blank"
+                rel="noreferrer"
+              >
+                Open in Solscan
+              </a>
+            ) : null}
+          </div>
         </div>
-      </div>
       ) : null}
     </Panel>
   );

@@ -110,7 +110,6 @@ describe("solana-stellar", () => {
         new anchor.BN(0),
         "QmUniverseMetadataHash",
         { model3D: {} } as any,
-        { custom: {} } as any,
         true
       )
       .accountsStrict({
@@ -129,7 +128,9 @@ describe("solana-stellar", () => {
         { concept: {} } as any,
         { ccBy4: {} } as any,
         "QmConceptMetadataHash",
-        "QmConceptPreviewHash"
+        "QmConceptPreviewHash",
+        true,
+        { custom: {} } as any
       )
       .accountsStrict({
         universe,
@@ -160,7 +161,9 @@ describe("solana-stellar", () => {
         { final: {} } as any,
         { unknown: {} } as any,
         "QmModelMetadataHash",
-        "QmModelPreviewHash"
+        "QmModelPreviewHash",
+        true,
+        { custom: {} } as any
       )
       .accountsStrict({
         universe,
@@ -319,7 +322,6 @@ describe("solana-stellar", () => {
         new anchor.BN(1),
         "QmUniverseMetadataHash2",
         { model3D: {} } as any,
-        { equal: {} } as any,
         true
       )
       .accountsStrict({
@@ -338,7 +340,9 @@ describe("solana-stellar", () => {
         { concept: {} } as any,
         { ccBy4: {} } as any,
         "QmBaseMetadataHash",
-        "QmBasePreviewHash"
+        "QmBasePreviewHash",
+        true,
+        { equal: {} } as any
       )
       .accountsStrict({
         universe,
@@ -363,7 +367,9 @@ describe("solana-stellar", () => {
         { texture: {} } as any,
         { ccBy4: {} } as any,
         "QmUvMetadataHash",
-        "QmUvPreviewHash"
+        "QmUvPreviewHash",
+        true,
+        { equal: {} } as any
       )
       .accountsStrict({
         universe,
@@ -401,7 +407,9 @@ describe("solana-stellar", () => {
         { motion: {} } as any,
         { ccBy4: {} } as any,
         "QmAnimMetadataHash",
-        "QmAnimPreviewHash"
+        "QmAnimPreviewHash",
+        true,
+        { equal: {} } as any
       )
       .accountsStrict({
         universe,
@@ -446,7 +454,9 @@ describe("solana-stellar", () => {
         { final: {} } as any,
         { ccBy4: {} } as any,
         "QmFinalMetadataHash",
-        "QmFinalPreviewHash"
+        "QmFinalPreviewHash",
+        true,
+        { equal: {} } as any
       )
       .accountsStrict({
         universe,
@@ -645,7 +655,9 @@ describe("solana-stellar", () => {
             subtype,
             { ccBy4: {} } as any,
             metadataHash,
-            previewHash
+            previewHash,
+            true,
+            { weighted: {} } as any
           )
           .accountsStrict({
             universe,
@@ -699,7 +711,6 @@ describe("solana-stellar", () => {
         new anchor.BN(2),
         "QmWeightedUniverseMetadata",
         { model3D: {} } as any,
-        { weighted: {} } as any,
         true
       )
       .accountsStrict({
@@ -905,7 +916,6 @@ describe("solana-stellar", () => {
         new anchor.BN(3),
         "QmUniverseRevenueMetadataHash",
         { model3D: {} } as any,
-        { custom: {} } as any,
         true
       )
       .accountsStrict({
@@ -924,7 +934,9 @@ describe("solana-stellar", () => {
         { concept: {} } as any,
         { ccBy4: {} } as any,
         "QmRevenueMetadataHash",
-        "QmRevenuePreviewHash"
+        "QmRevenuePreviewHash",
+        true,
+        { custom: {} } as any
       )
       .accountsStrict({
         universe,
@@ -1000,7 +1012,9 @@ describe("solana-stellar", () => {
       })
       .rpc();
 
-    const vaultBalanceBeforeDeposit = await provider.connection.getBalance(vault);
+    const vaultBalanceBeforeDeposit = await provider.connection.getBalance(
+      vault
+    );
 
     await program.methods
       .depositRevenue(new anchor.BN(1_000_000))
@@ -1043,13 +1057,19 @@ describe("solana-stellar", () => {
       })
       .rpc();
 
-    const fetchedOwnerShare = await program.account.contributorShare.fetch(ownerShare);
+    const fetchedOwnerShare = await program.account.contributorShare.fetch(
+      ownerShare
+    );
     const fetchedContributorShare =
       await program.account.contributorShare.fetch(contributorShare);
-    const fetchedBranchShare = await program.account.contributorShare.fetch(branchShare);
+    const fetchedBranchShare = await program.account.contributorShare.fetch(
+      branchShare
+    );
 
     expect(fetchedOwnerShare.claimedLamports.toNumber()).to.equal(333_300);
-    expect(fetchedContributorShare.claimedLamports.toNumber()).to.equal(333_300);
+    expect(fetchedContributorShare.claimedLamports.toNumber()).to.equal(
+      333_300
+    );
     expect(fetchedBranchShare.claimedLamports.toNumber()).to.equal(333_400);
 
     const fetchedRelease = await program.account.release.fetch(release);
@@ -1060,9 +1080,10 @@ describe("solana-stellar", () => {
 
     const vaultBalanceAfterClaims = await provider.connection.getBalance(vault);
     expect(vaultBalanceAfterClaims).to.equal(vaultBalanceBeforeDeposit);
-    const vaultRentReserve = await provider.connection.getMinimumBalanceForRentExemption(
-      releaseVaultRentExemptBytes
-    );
+    const vaultRentReserve =
+      await provider.connection.getMinimumBalanceForRentExemption(
+        releaseVaultRentExemptBytes
+      );
     expect(vaultBalanceAfterClaims).to.equal(vaultRentReserve);
 
     try {
@@ -1083,7 +1104,7 @@ describe("solana-stellar", () => {
     }
   });
 
-  it("keeps universe collaboration policy immutable after creation", async () => {
+  it("keeps collaboration settings on assets instead of universes", async () => {
     const registry = registryPda();
     const registryDataBefore = (await program.account.registry.fetch(
       registry
@@ -1092,13 +1113,13 @@ describe("solana-stellar", () => {
     const ownerIndex = globalIndex;
     const universe = universePda(ownerIndex);
     const universeLookup = universeIndexPda(globalIndex);
+    const asset = assetPda(universe, 0);
 
     await program.methods
       .createUniverse(
         new anchor.BN(ownerIndex),
-        "QmImmutablePolicyMetadata",
+        "QmAssetPolicyUniverseMetadata",
         { model3D: {} } as any,
-        { equal: {} } as any,
         true
       )
       .accountsStrict({
@@ -1111,24 +1132,61 @@ describe("solana-stellar", () => {
       .rpc();
 
     await program.methods
-      .updateUniverse("QmImmutablePolicyMetadata2", false, { equal: {} } as any)
+      .createAsset(
+        new anchor.BN(0),
+        { model3D: {} } as any,
+        { concept: {} } as any,
+        { ccBy4: {} } as any,
+        "QmAssetPolicyMetadata",
+        "QmAssetPolicyPreview",
+        false,
+        { weighted: {} } as any
+      )
+      .accountsStrict({
+        universe,
+        asset,
+        creator: owner.publicKey,
+        systemProgram: anchor.web3.SystemProgram.programId,
+      })
+      .rpc();
+
+    await program.methods
+      .updateUniverse("QmAssetPolicyUniverseMetadata2", false)
       .accountsStrict({
         universe,
         owner: owner.publicKey,
       })
       .rpc();
 
+    await program.methods
+      .updateAssetMetadata(
+        { ccBy4: {} } as any,
+        "QmAssetPolicyMetadata2",
+        "QmAssetPolicyPreview2",
+        true,
+        { weighted: {} } as any
+      )
+      .accountsStrict({
+        asset,
+        creator: owner.publicKey,
+      })
+      .rpc();
+
     try {
       await program.methods
-        .updateUniverse("QmImmutablePolicyMetadata3", true, {
-          custom: {},
-        } as any)
+        .updateAssetMetadata(
+          { ccBy4: {} } as any,
+          "QmAssetPolicyMetadata3",
+          "QmAssetPolicyPreview3",
+          true,
+          { custom: {} } as any
+        )
         .accountsStrict({
-          universe,
-          owner: owner.publicKey,
+          asset,
+          creator: owner.publicKey,
         })
         .rpc();
-      expect.fail("Expected collaboration policy change to be rejected");
+      expect.fail("Expected asset collaboration policy change to be rejected");
     } catch (error: any) {
       expect(error.error?.errorCode?.code).to.equal(
         "ImmutableCollaborationPolicy"
@@ -1136,6 +1194,10 @@ describe("solana-stellar", () => {
     }
 
     const fetchedUniverse = await program.account.universe.fetch(universe);
-    expect(fetchedUniverse.collaborationPolicy).to.deep.equal({ equal: {} });
+    const fetchedAsset = await program.account.asset.fetch(asset);
+    expect(fetchedUniverse.open).to.equal(false);
+    expect((fetchedUniverse as any).collaborationPolicy).to.equal(undefined);
+    expect(fetchedAsset.open).to.equal(true);
+    expect(fetchedAsset.collaborationPolicy).to.deep.equal({ weighted: {} });
   });
 });
