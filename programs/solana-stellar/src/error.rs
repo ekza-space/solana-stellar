@@ -42,6 +42,8 @@ pub enum StellarError {
     InvalidShareBps,
     #[msg("Invalid release distribution model for this operation.")]
     InvalidDistributionModel,
+    #[msg("Invalid release deployment project slug.")]
+    InvalidProjectSlug,
     #[msg("Collaboration policy is immutable after asset creation.")]
     ImmutableCollaborationPolicy,
     #[msg("Invalid revenue amount.")]

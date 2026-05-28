@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
 
-use crate::constants::MAX_HASH_LEN;
+use crate::constants::{MAX_HASH_LEN, MAX_PROJECT_SLUG_LEN};
 
 #[account]
 pub struct Registry {
@@ -121,6 +121,20 @@ impl Release {
     pub fn accepts_revenue(&self) -> bool {
         self.status == ReleaseStatus::Finalized || self.status == ReleaseStatus::Linked
     }
+}
+
+#[account]
+pub struct ReleaseDeployment {
+    pub release: Pubkey,
+    pub project_slug: String,
+    pub registry_program: Pubkey,
+    pub registry_record: Pubkey,
+    pub deployed_at: i64,
+    pub bump: u8,
+}
+
+impl ReleaseDeployment {
+    pub const INIT_SPACE: usize = 32 + (4 + MAX_PROJECT_SLUG_LEN) + 32 + 32 + 8 + 1;
 }
 
 #[account]

@@ -1,0 +1,642 @@
+{
+  "address": "C4uzdQfB32AHXrLg3bnHMQdK6rmTz66qS37DrEFE2ioe",
+  "metadata": {
+    "name": "solana_omoba_registry",
+    "version": "0.1.0",
+    "spec": "0.1.0",
+    "description": "Created with Anchor"
+  },
+  "instructions": [
+    {
+      "name": "initialize",
+      "discriminator": [
+        175,
+        175,
+        109,
+        31,
+        13,
+        152,
+        155,
+        237
+      ],
+      "accounts": [],
+      "args": []
+    },
+    {
+      "name": "initialize_avatar",
+      "discriminator": [
+        234,
+        87,
+        220,
+        236,
+        146,
+        157,
+        181,
+        84
+      ],
+      "accounts": [
+        {
+          "name": "registry",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  118,
+                  97,
+                  116,
+                  97,
+                  114,
+                  95,
+                  114,
+                  101,
+                  103,
+                  105,
+                  115,
+                  116,
+                  114,
+                  121
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "avatar_data",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  118,
+                  97,
+                  116,
+                  97,
+                  114,
+                  95,
+                  118,
+                  49
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "registry.next_index",
+                "account": "AvatarRegistry"
+              }
+            ]
+          }
+        },
+        {
+          "name": "payer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "escrow",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  118,
+                  97,
+                  116,
+                  97,
+                  114,
+                  95,
+                  101,
+                  115,
+                  99,
+                  114,
+                  111,
+                  119
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "registry.next_index",
+                "account": "AvatarRegistry"
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "uri_ipfs_hash",
+          "type": "string"
+        },
+        {
+          "name": "max_supply",
+          "type": "u64"
+        },
+        {
+          "name": "minting_fee_per_mint",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "initialize_avatar_from_stellar",
+      "discriminator": [
+        246,
+        235,
+        48,
+        181,
+        80,
+        48,
+        214,
+        106
+      ],
+      "accounts": [
+        {
+          "name": "registry",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  118,
+                  97,
+                  116,
+                  97,
+                  114,
+                  95,
+                  114,
+                  101,
+                  103,
+                  105,
+                  115,
+                  116,
+                  114,
+                  121
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "avatar_data",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  118,
+                  97,
+                  116,
+                  97,
+                  114,
+                  95,
+                  118,
+                  49
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "registry.next_index",
+                "account": "AvatarRegistry"
+              }
+            ]
+          }
+        },
+        {
+          "name": "payer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "escrow",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  118,
+                  97,
+                  116,
+                  97,
+                  114,
+                  95,
+                  101,
+                  115,
+                  99,
+                  114,
+                  111,
+                  119
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "registry.next_index",
+                "account": "AvatarRegistry"
+              }
+            ]
+          }
+        },
+        {
+          "name": "stellar_link",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  116,
+                  101,
+                  108,
+                  108,
+                  97,
+                  114,
+                  95,
+                  97,
+                  118,
+                  97,
+                  116,
+                  97,
+                  114,
+                  95,
+                  108,
+                  105,
+                  110,
+                  107
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "avatar_data"
+              }
+            ]
+          }
+        },
+        {
+          "name": "stellar_program"
+        },
+        {
+          "name": "stellar_universe"
+        },
+        {
+          "name": "stellar_release",
+          "writable": true
+        },
+        {
+          "name": "stellar_vault"
+        },
+        {
+          "name": "stellar_release_deployment",
+          "writable": true
+        },
+        {
+          "name": "stellar_release_link",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  116,
+                  101,
+                  108,
+                  108,
+                  97,
+                  114,
+                  95,
+                  114,
+                  101,
+                  108,
+                  101,
+                  97,
+                  115,
+                  101,
+                  95,
+                  108,
+                  105,
+                  110,
+                  107
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "stellar_release"
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "uri_ipfs_hash",
+          "type": "string"
+        },
+        {
+          "name": "max_supply",
+          "type": "u64"
+        },
+        {
+          "name": "minting_fee_per_mint",
+          "type": "u64"
+        }
+      ]
+    }
+  ],
+  "accounts": [
+    {
+      "name": "AvatarData",
+      "discriminator": [
+        127,
+        237,
+        205,
+        27,
+        232,
+        44,
+        87,
+        218
+      ]
+    },
+    {
+      "name": "AvatarRegistry",
+      "discriminator": [
+        32,
+        236,
+        2,
+        104,
+        106,
+        31,
+        84,
+        61
+      ]
+    },
+    {
+      "name": "Escrow",
+      "discriminator": [
+        31,
+        213,
+        123,
+        187,
+        186,
+        22,
+        218,
+        155
+      ]
+    },
+    {
+      "name": "StellarAvatarLink",
+      "discriminator": [
+        93,
+        12,
+        30,
+        38,
+        186,
+        184,
+        97,
+        235
+      ]
+    },
+    {
+      "name": "StellarReleaseLink",
+      "discriminator": [
+        94,
+        52,
+        249,
+        193,
+        35,
+        188,
+        145,
+        125
+      ]
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "InvalidUriLength",
+      "msg": "Invalid URI or IPFS hash length."
+    },
+    {
+      "code": 6001,
+      "name": "InvalidMaxSupply",
+      "msg": "Maximum supply must be greater than zero."
+    },
+    {
+      "code": 6002,
+      "name": "NumericalOverflow",
+      "msg": "Numerical overflow occurred."
+    },
+    {
+      "code": 6003,
+      "name": "Unauthorized",
+      "msg": "Unauthorized action."
+    },
+    {
+      "code": 6004,
+      "name": "InvalidStellarProgram",
+      "msg": "Invalid Stellar program."
+    },
+    {
+      "code": 6005,
+      "name": "InvalidStellarUniverse",
+      "msg": "Invalid Stellar universe account."
+    },
+    {
+      "code": 6006,
+      "name": "InvalidStellarRelease",
+      "msg": "Invalid Stellar release account."
+    },
+    {
+      "code": 6007,
+      "name": "InvalidStellarVault",
+      "msg": "Invalid Stellar vault account."
+    }
+  ],
+  "types": [
+    {
+      "name": "AvatarData",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "uri_ipfs_hash",
+            "type": "string"
+          },
+          {
+            "name": "creator",
+            "type": "pubkey"
+          },
+          {
+            "name": "max_supply",
+            "type": "u64"
+          },
+          {
+            "name": "current_supply",
+            "type": "u64"
+          },
+          {
+            "name": "minting_fee_per_mint",
+            "type": "u64"
+          },
+          {
+            "name": "total_unclaimed_fees",
+            "type": "u64"
+          },
+          {
+            "name": "index",
+            "type": "u64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "AvatarRegistry",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "next_index",
+            "type": "u64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Escrow",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "StellarAvatarLink",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "avatar_data",
+            "type": "pubkey"
+          },
+          {
+            "name": "stellar_program",
+            "type": "pubkey"
+          },
+          {
+            "name": "universe",
+            "type": "pubkey"
+          },
+          {
+            "name": "asset",
+            "type": "pubkey"
+          },
+          {
+            "name": "release",
+            "type": "pubkey"
+          },
+          {
+            "name": "vault",
+            "type": "pubkey"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "StellarReleaseLink",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "release",
+            "type": "pubkey"
+          },
+          {
+            "name": "stellar_program",
+            "type": "pubkey"
+          },
+          {
+            "name": "universe",
+            "type": "pubkey"
+          },
+          {
+            "name": "asset",
+            "type": "pubkey"
+          },
+          {
+            "name": "vault",
+            "type": "pubkey"
+          },
+          {
+            "name": "avatar_data",
+            "type": "pubkey"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    }
+  ],
+  "constants": [
+    {
+      "name": "AVATAR_SEED",
+      "type": "bytes",
+      "value": "[97, 118, 97, 116, 97, 114, 95, 118, 49]"
+    },
+    {
+      "name": "ESCROW_SEED",
+      "type": "bytes",
+      "value": "[97, 118, 97, 116, 97, 114, 95, 101, 115, 99, 114, 111, 119]"
+    },
+    {
+      "name": "REGISTRY_SEED",
+      "type": "bytes",
+      "value": "[97, 118, 97, 116, 97, 114, 95, 114, 101, 103, 105, 115, 116, 114, 121]"
+    },
+    {
+      "name": "STELLAR_LINK_SEED",
+      "type": "bytes",
+      "value": "[115, 116, 101, 108, 108, 97, 114, 95, 97, 118, 97, 116, 97, 114, 95, 108, 105, 110, 107]"
+    },
+    {
+      "name": "STELLAR_RELEASE_LINK_SEED",
+      "type": "bytes",
+      "value": "[115, 116, 101, 108, 108, 97, 114, 95, 114, 101, 108, 101, 97, 115, 101, 95, 108, 105, 110, 107]"
+    }
+  ]
+}

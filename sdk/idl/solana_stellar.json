@@ -684,6 +684,62 @@
       ]
     },
     {
+      "name": "record_release_deployment",
+      "discriminator": [239, 176, 226, 228, 241, 1, 42, 119],
+      "accounts": [
+        {
+          "name": "release"
+        },
+        {
+          "name": "deployment",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114, 101, 108, 101, 97, 115, 101, 95, 100, 101, 112, 108, 111,
+                  121, 109, 101, 110, 116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "release"
+              },
+              {
+                "kind": "arg",
+                "path": "project_slug"
+              }
+            ]
+          }
+        },
+        {
+          "name": "authority",
+          "writable": true,
+          "signer": true,
+          "relations": ["release"]
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "project_slug",
+          "type": "string"
+        },
+        {
+          "name": "registry_program",
+          "type": "pubkey"
+        },
+        {
+          "name": "registry_record",
+          "type": "pubkey"
+        }
+      ]
+    },
+    {
       "name": "reject_asset",
       "discriminator": [79, 96, 89, 56, 10, 45, 227, 217],
       "accounts": [
@@ -811,6 +867,10 @@
       "discriminator": [229, 49, 96, 148, 167, 188, 17, 49]
     },
     {
+      "name": "ReleaseDeployment",
+      "discriminator": [227, 248, 188, 19, 26, 23, 200, 45]
+    },
+    {
       "name": "ReleaseVault",
       "discriminator": [33, 38, 51, 77, 217, 179, 1, 5]
     },
@@ -843,6 +903,10 @@
     {
       "name": "ReleaseCreated",
       "discriminator": [86, 95, 64, 109, 171, 247, 137, 65]
+    },
+    {
+      "name": "ReleaseDeploymentRecorded",
+      "discriminator": [20, 69, 23, 66, 179, 245, 16, 90]
     },
     {
       "name": "ReleaseDistributionModelSet",
@@ -976,31 +1040,36 @@
     },
     {
       "code": 6020,
+      "name": "InvalidProjectSlug",
+      "msg": "Invalid release deployment project slug."
+    },
+    {
+      "code": 6021,
       "name": "ImmutableCollaborationPolicy",
       "msg": "Collaboration policy is immutable after asset creation."
     },
     {
-      "code": 6021,
+      "code": 6022,
       "name": "InvalidRevenueAmount",
       "msg": "Invalid revenue amount."
     },
     {
-      "code": 6022,
+      "code": 6023,
       "name": "InsufficientVaultBalanceForClaim",
       "msg": "Release vault balance is below required reserve for claims."
     },
     {
-      "code": 6023,
+      "code": 6024,
       "name": "NoRevenueToClaim",
       "msg": "No revenue available to claim."
     },
     {
-      "code": 6024,
+      "code": 6025,
       "name": "InsufficientVaultBalance",
       "msg": "Release vault balance is insufficient."
     },
     {
-      "code": 6025,
+      "code": 6026,
       "name": "NumericalOverflow",
       "msg": "Numerical overflow occurred."
     }
@@ -1485,6 +1554,62 @@
           {
             "name": "index",
             "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ReleaseDeployment",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "release",
+            "type": "pubkey"
+          },
+          {
+            "name": "project_slug",
+            "type": "string"
+          },
+          {
+            "name": "registry_program",
+            "type": "pubkey"
+          },
+          {
+            "name": "registry_record",
+            "type": "pubkey"
+          },
+          {
+            "name": "deployed_at",
+            "type": "i64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ReleaseDeploymentRecorded",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "release",
+            "type": "pubkey"
+          },
+          {
+            "name": "project_slug",
+            "type": "string"
+          },
+          {
+            "name": "registry_program",
+            "type": "pubkey"
+          },
+          {
+            "name": "registry_record",
+            "type": "pubkey"
           }
         ]
       }

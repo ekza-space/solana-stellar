@@ -72,6 +72,14 @@ pub struct AvatarDataLinked {
 }
 
 #[event]
+pub struct ReleaseDeploymentRecorded {
+    pub release: Pubkey,
+    pub project_slug: String,
+    pub registry_program: Pubkey,
+    pub registry_record: Pubkey,
+}
+
+#[event]
 pub struct RevenueDeposited {
     pub release: Pubkey,
     pub vault: Pubkey,

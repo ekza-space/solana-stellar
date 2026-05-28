@@ -750,6 +750,78 @@ export type SolanaStellar = {
       ];
     },
     {
+      name: "recordReleaseDeployment";
+      discriminator: [239, 176, 226, 228, 241, 1, 42, 119];
+      accounts: [
+        {
+          name: "release";
+        },
+        {
+          name: "deployment";
+          writable: true;
+          pda: {
+            seeds: [
+              {
+                kind: "const";
+                value: [
+                  114,
+                  101,
+                  108,
+                  101,
+                  97,
+                  115,
+                  101,
+                  95,
+                  100,
+                  101,
+                  112,
+                  108,
+                  111,
+                  121,
+                  109,
+                  101,
+                  110,
+                  116
+                ];
+              },
+              {
+                kind: "account";
+                path: "release";
+              },
+              {
+                kind: "arg";
+                path: "projectSlug";
+              }
+            ];
+          };
+        },
+        {
+          name: "authority";
+          writable: true;
+          signer: true;
+          relations: ["release"];
+        },
+        {
+          name: "systemProgram";
+          address: "11111111111111111111111111111111";
+        }
+      ];
+      args: [
+        {
+          name: "projectSlug";
+          type: "string";
+        },
+        {
+          name: "registryProgram";
+          type: "pubkey";
+        },
+        {
+          name: "registryRecord";
+          type: "pubkey";
+        }
+      ];
+    },
+    {
       name: "rejectAsset";
       discriminator: [79, 96, 89, 56, 10, 45, 227, 217];
       accounts: [
@@ -877,6 +949,10 @@ export type SolanaStellar = {
       discriminator: [229, 49, 96, 148, 167, 188, 17, 49];
     },
     {
+      name: "releaseDeployment";
+      discriminator: [227, 248, 188, 19, 26, 23, 200, 45];
+    },
+    {
       name: "releaseVault";
       discriminator: [33, 38, 51, 77, 217, 179, 1, 5];
     },
@@ -909,6 +985,10 @@ export type SolanaStellar = {
     {
       name: "releaseCreated";
       discriminator: [86, 95, 64, 109, 171, 247, 137, 65];
+    },
+    {
+      name: "releaseDeploymentRecorded";
+      discriminator: [20, 69, 23, 66, 179, 245, 16, 90];
     },
     {
       name: "releaseDistributionModelSet";
@@ -1042,31 +1122,36 @@ export type SolanaStellar = {
     },
     {
       code: 6020;
+      name: "invalidProjectSlug";
+      msg: "Invalid release deployment project slug.";
+    },
+    {
+      code: 6021;
       name: "immutableCollaborationPolicy";
       msg: "Collaboration policy is immutable after asset creation.";
     },
     {
-      code: 6021;
+      code: 6022;
       name: "invalidRevenueAmount";
       msg: "Invalid revenue amount.";
     },
     {
-      code: 6022;
+      code: 6023;
       name: "insufficientVaultBalanceForClaim";
       msg: "Release vault balance is below required reserve for claims.";
     },
     {
-      code: 6023;
+      code: 6024;
       name: "noRevenueToClaim";
       msg: "No revenue available to claim.";
     },
     {
-      code: 6024;
+      code: 6025;
       name: "insufficientVaultBalance";
       msg: "Release vault balance is insufficient.";
     },
     {
-      code: 6025;
+      code: 6026;
       name: "numericalOverflow";
       msg: "Numerical overflow occurred.";
     }
@@ -1551,6 +1636,62 @@ export type SolanaStellar = {
           {
             name: "index";
             type: "u64";
+          }
+        ];
+      };
+    },
+    {
+      name: "releaseDeployment";
+      type: {
+        kind: "struct";
+        fields: [
+          {
+            name: "release";
+            type: "pubkey";
+          },
+          {
+            name: "projectSlug";
+            type: "string";
+          },
+          {
+            name: "registryProgram";
+            type: "pubkey";
+          },
+          {
+            name: "registryRecord";
+            type: "pubkey";
+          },
+          {
+            name: "deployedAt";
+            type: "i64";
+          },
+          {
+            name: "bump";
+            type: "u8";
+          }
+        ];
+      };
+    },
+    {
+      name: "releaseDeploymentRecorded";
+      type: {
+        kind: "struct";
+        fields: [
+          {
+            name: "release";
+            type: "pubkey";
+          },
+          {
+            name: "projectSlug";
+            type: "string";
+          },
+          {
+            name: "registryProgram";
+            type: "pubkey";
+          },
+          {
+            name: "registryRecord";
+            type: "pubkey";
           }
         ];
       };

@@ -7,6 +7,7 @@ import idl from "../../../target/idl/solana_stellar.json";
 import type { SolanaStellar } from "../../../target/types/solana_stellar";
 
 export const PROGRAM_ID = new PublicKey(idl.address);
+export const RELEASE_DEPLOYMENT_PROJECT_OMOBA = "omoba";
 
 export type StellarClient = {
   provider: anchor.AnchorProvider;
@@ -153,6 +154,20 @@ export function deriveVault(release: PublicKey) {
 export function deriveShare(release: PublicKey, contributor: PublicKey) {
   return PublicKey.findProgramAddressSync(
     [Buffer.from("share"), release.toBuffer(), contributor.toBuffer()],
+    PROGRAM_ID
+  )[0];
+}
+
+export function deriveReleaseDeployment(
+  release: PublicKey,
+  projectSlug: string
+) {
+  return PublicKey.findProgramAddressSync(
+    [
+      Buffer.from("release_deployment"),
+      release.toBuffer(),
+      Buffer.from(projectSlug),
+    ],
     PROGRAM_ID
   )[0];
 }

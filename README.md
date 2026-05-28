@@ -21,6 +21,8 @@ limits.
 - **Release**: an immutable production snapshot of an approved asset.
 - **Release Vault**: a PDA-controlled revenue vault for mint fees, royalties, or
   downstream app revenue.
+- **Release Deployment**: a per-release, per-project PDA that records where a
+  finalized asset was published, for example `avatar` or `omoba`.
 - **Contributor Share**: basis-point revenue allocation stored independently
   from NFT metadata creator fields.
 
@@ -33,13 +35,14 @@ This repository currently implements the Solana protocol core:
 - asset lifecycle states from draft to finalized;
 - asset parent links for lineage tracking;
 - release creation and finalization;
+- release deployment records keyed by short downstream project slugs;
 - contributor shares in basis points;
 - vault deposits and contributor revenue claims.
 
-NFT minting and user-facing avatar identity remain separate concerns. The
-intended downstream consumer is `solana-avatars`, which can mint avatar NFTs
-from finalized Stellar releases while keeping collaboration accounting inside
-this protocol.
+NFT minting, avatar identity, and app-specific model registries remain separate
+concerns. Current downstream consumers are `solana-avatars` and
+`solana-omoba-registry`: finalized Stellar releases keep collaboration accounting
+inside this protocol while those registry programs own their app-specific data.
 
 ## Development
 
@@ -73,6 +76,18 @@ textures. Use
 more model-backed projects, or `make seed-everything-localnet MODEL_COUNT=10`
 to append to the current manifest universe. For local OBJ loader diagnostics
 only, pass `MODEL_FORMAT=obj` or `MODEL_FORMAT=all`.
+
+Local downstream registry deployment can be driven from this repo while keeping
+the actual registry programs in sibling repositories:
+
+```sh
+make deploy-local-registry-programs
+make deploy-local-omoba-programs
+```
+
+`DOWNSTREAM_REGISTRY_PROJECTS` stores the short local registry slugs used by the
+bulk target. It defaults to `avatar omoba` and expects sibling repos at
+`../solana-avatars` and `../solana-omoba-registry`.
 
 ## TypeScript SDK
 

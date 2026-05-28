@@ -5,6 +5,8 @@ ALLOW_MAINNET ?= 0
 ALLOW_REMOTE_SEED ?= 0
 WALLET ?= $(HOME)/.config/solana/id.json
 SOLANA_AVATARS_DIR ?= $(CURDIR)/../solana-avatars
+SOLANA_OMOBA_REGISTRY_DIR ?= $(CURDIR)/../solana-omoba-registry
+DOWNSTREAM_REGISTRY_PROJECTS ?= avatar omoba
 
 LOCALNET_URL ?= http://127.0.0.1:8899
 DEVNET_URL ?= https://api.devnet.solana.com
@@ -82,7 +84,8 @@ RPC_URL ?= $(DEFAULT_RPC_URL)
 	seed-random-models seed-new-random-models seed-new-single seed-wotori seed-new-wotori \
 	seed-everything-localnet seed-new-everything-localnet seed-new-single-localnet seed-wotori-localnet seed-new-wotori-localnet \
 	setup-localnet setup-localnet-single capture-seed-previews deploy-everything-localnet \
-	deploy-wotori-localnet deploy-local-avatar-programs
+	deploy-wotori-localnet deploy-local-registry-programs deploy-local-avatar-programs \
+	deploy-local-omoba-programs
 
 help:
 	@printf "%s\n" \
@@ -104,7 +107,9 @@ help:
 		"  make setup-localnet MODEL_COUNT=10 Deploy + seed a fresh localnet universe" \
 		"  make setup-localnet-single         Deploy + seed one model-backed project" \
 		"  make deploy-wotori-localnet        Deploy program + seed a fresh Wotori Studio universe" \
+		"  make deploy-local-registry-programs Deploy configured downstream registries to localnet" \
 		"  make deploy-local-avatar-programs   Deploy solana-avatars + avatar minter to localnet (requires sibling ../solana-avatars repo)" \
+		"  make deploy-local-omoba-programs    Deploy solana-omoba-registry to localnet (requires sibling ../solana-omoba-registry repo)" \
 		"" \
 		"Seeder:" \
 		"  make seed-random-models            Append random models to manifest universe" \
@@ -121,11 +126,12 @@ help:
 		"  METADATA_BASE_URL=http://...       Seeder metadata URL" \
 		"  LOCALNET_CLONE_METAPLEX=0          Disable local Metaplex Token Metadata clone" \
 		"  LOCALNET_RESET=1                   Pass --reset to solana-test-validator" \
-		"  LOCALNET_EXTRA_ARGS='...'          Extra solana-test-validator args"
+		"  LOCALNET_EXTRA_ARGS='...'          Extra solana-test-validator args" \
+		"  DOWNSTREAM_REGISTRY_PROJECTS='avatar omoba'  Registry project slugs for deploy-local-registry-programs"
 
 print-config:
-	@printf "CLUSTER=%s\nANCHOR_CLUSTER=%s\nRPC_URL=%s\nWALLET=%s\nEVERYTHING_DIR=%s\nWOTORI_DIR=%s\nMODEL_COUNT=%s\nMODEL_FORMAT=%s\nMETADATA_BASE_URL=%s\nLOCALNET_CLONE_METAPLEX=%s\nLOCALNET_RESET=%s\nMETAPLEX_TOKEN_METADATA_PROGRAM=%s\nMETAPLEX_CLONE_URL=%s\n" \
-		"$(CLUSTER)" "$(ANCHOR_CLUSTER)" "$(RPC_URL)" "$(WALLET)" "$(EVERYTHING_DIR)" "$(WOTORI_DIR)" "$(MODEL_COUNT)" "$(MODEL_FORMAT)" "$(METADATA_BASE_URL)" "$(LOCALNET_CLONE_METAPLEX)" "$(LOCALNET_RESET)" "$(METAPLEX_TOKEN_METADATA_PROGRAM)" "$(METAPLEX_CLONE_URL)"
+	@printf "CLUSTER=%s\nANCHOR_CLUSTER=%s\nRPC_URL=%s\nWALLET=%s\nEVERYTHING_DIR=%s\nWOTORI_DIR=%s\nMODEL_COUNT=%s\nMODEL_FORMAT=%s\nMETADATA_BASE_URL=%s\nLOCALNET_CLONE_METAPLEX=%s\nLOCALNET_RESET=%s\nMETAPLEX_TOKEN_METADATA_PROGRAM=%s\nMETAPLEX_CLONE_URL=%s\nSOLANA_AVATARS_DIR=%s\nSOLANA_OMOBA_REGISTRY_DIR=%s\nDOWNSTREAM_REGISTRY_PROJECTS=%s\n" \
+		"$(CLUSTER)" "$(ANCHOR_CLUSTER)" "$(RPC_URL)" "$(WALLET)" "$(EVERYTHING_DIR)" "$(WOTORI_DIR)" "$(MODEL_COUNT)" "$(MODEL_FORMAT)" "$(METADATA_BASE_URL)" "$(LOCALNET_CLONE_METAPLEX)" "$(LOCALNET_RESET)" "$(METAPLEX_TOKEN_METADATA_PROGRAM)" "$(METAPLEX_CLONE_URL)" "$(SOLANA_AVATARS_DIR)" "$(SOLANA_OMOBA_REGISTRY_DIR)" "$(DOWNSTREAM_REGISTRY_PROJECTS)"
 
 check-mainnet:
 	@if [[ "$(ANCHOR_CLUSTER)" == "mainnet-beta" && "$(ALLOW_MAINNET)" != "1" ]]; then \
@@ -253,6 +259,16 @@ setup-localnet-single:
 	$(MAKE) CLUSTER=localnet deploy-localnet
 	$(MAKE) CLUSTER=localnet seed-new-single
 
+deploy-local-registry-programs:
+	@if [[ "$(ANCHOR_CLUSTER)" != "localnet" ]]; then \
+		echo "deploy-local-registry-programs is intended for localnet only (set CLUSTER=localnet)."; \
+		exit 1; \
+	fi
+	@for project in $(DOWNSTREAM_REGISTRY_PROJECTS); do \
+		echo "==> deploy local registry project: $${project}"; \
+		$(MAKE) CLUSTER=localnet RPC_URL="$(RPC_URL)" WALLET="$(WALLET)" deploy-local-$${project}-programs; \
+	done
+
 deploy-local-avatar-programs:
 	@if [[ "$(ANCHOR_CLUSTER)" != "localnet" ]]; then \
 		echo "deploy-local-avatar-programs is intended for localnet only (set CLUSTER=localnet)."; \
@@ -266,6 +282,18 @@ deploy-local-avatar-programs:
 		anchor build && \
 		anchor deploy --program-name minter --program-keypair target-deploy-keypair-minter.json --provider.cluster "$(RPC_URL)" --provider.wallet "$(WALLET)" && \
 		anchor deploy --program-name avatars --program-keypair target-deploy-keypair.json --provider.cluster "$(RPC_URL)" --provider.wallet "$(WALLET)"
+
+deploy-local-omoba-programs:
+	@if [[ "$(ANCHOR_CLUSTER)" != "localnet" ]]; then \
+		echo "deploy-local-omoba-programs is intended for localnet only (set CLUSTER=localnet)."; \
+		exit 1; \
+	fi
+	@if [[ ! -d "$(SOLANA_OMOBA_REGISTRY_DIR)" ]]; then \
+		echo "Missing Solana Omoba Registry repo at $(SOLANA_OMOBA_REGISTRY_DIR)"; \
+		exit 1; \
+	fi
+	cd "$(SOLANA_OMOBA_REGISTRY_DIR)" && \
+		$(MAKE) CLUSTER=localnet RPC_URL="$(RPC_URL)" WALLET="$(WALLET)" deploy
 
 capture-seed-previews:
 	node scripts/capture-manifest-previews.js --folder "$(EVERYTHING_DIR)" --app-url "$(EKZA_STELLAR_URL)" --metadata-base-url "$(METADATA_BASE_URL)"

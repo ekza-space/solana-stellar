@@ -2,13 +2,13 @@ use anchor_lang::prelude::*;
 
 use crate::{
     constants::{
-        ASSET_SEED, LINK_SEED, REGISTRY_SEED, RELEASE_SEED, SHARE_SEED, UNIVERSE_INDEX_SEED,
-        UNIVERSE_SEED, VAULT_SEED,
+        ASSET_SEED, LINK_SEED, REGISTRY_SEED, RELEASE_DEPLOYMENT_SEED, RELEASE_SEED, SHARE_SEED,
+        UNIVERSE_INDEX_SEED, UNIVERSE_SEED, VAULT_SEED,
     },
     error::StellarError,
     state::{
-        Asset, AssetParent, AssetStatus, ContributorShare, Registry, Release, ReleaseVault,
-        Universe, UniverseIndex,
+        Asset, AssetParent, AssetStatus, ContributorShare, Registry, Release, ReleaseDeployment,
+        ReleaseVault, Universe, UniverseIndex,
     },
 };
 
@@ -279,6 +279,28 @@ pub struct LinkAvatarData<'info> {
     )]
     pub release: Account<'info, Release>,
     pub owner: Signer<'info>,
+}
+
+#[derive(Accounts)]
+#[instruction(project_slug: String)]
+pub struct RecordReleaseDeployment<'info> {
+    #[account(has_one = authority @ StellarError::Unauthorized)]
+    pub release: Account<'info, Release>,
+    #[account(
+        init_if_needed,
+        payer = authority,
+        space = 8 + ReleaseDeployment::INIT_SPACE,
+        seeds = [
+            RELEASE_DEPLOYMENT_SEED,
+            release.key().as_ref(),
+            project_slug.as_bytes()
+        ],
+        bump
+    )]
+    pub deployment: Account<'info, ReleaseDeployment>,
+    #[account(mut)]
+    pub authority: Signer<'info>,
+    pub system_program: Program<'info, System>,
 }
 
 #[derive(Accounts)]

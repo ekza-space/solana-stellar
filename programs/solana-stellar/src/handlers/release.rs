@@ -2,15 +2,15 @@ use anchor_lang::prelude::*;
 use anchor_lang::solana_program::{program::invoke_signed, system_instruction};
 
 use crate::{
-    constants::{BPS_DENOMINATOR, SHARE_SEED},
+    constants::{BPS_DENOMINATOR, MAX_PROJECT_SLUG_LEN, SHARE_SEED},
     contexts::{
         AddReleaseShare, CreateRelease, FinalizeLineageEqualRelease, FinalizeRelease,
-        LinkAvatarData,
+        LinkAvatarData, RecordReleaseDeployment,
     },
     error::StellarError,
     events::{
-        AssetStatusChanged, AvatarDataLinked, ReleaseCreated, ReleaseDistributionModelSet,
-        ReleaseShareAdded, ReleaseStatusChanged,
+        AssetStatusChanged, AvatarDataLinked, ReleaseCreated, ReleaseDeploymentRecorded,
+        ReleaseDistributionModelSet, ReleaseShareAdded, ReleaseStatusChanged,
     },
     state::{
         Asset, AssetParent, AssetStatus, CollaborationPolicy, ContributorShare, ReleaseStatus,
@@ -27,6 +27,20 @@ fn is_auto_lineage_model(policy: CollaborationPolicy) -> bool {
 
 fn is_manual_split_model(policy: CollaborationPolicy) -> bool {
     matches!(policy, CollaborationPolicy::Custom)
+}
+
+fn validate_project_slug(project_slug: &str) -> Result<()> {
+    require!(
+        !project_slug.is_empty() && project_slug.len() <= MAX_PROJECT_SLUG_LEN,
+        StellarError::InvalidProjectSlug
+    );
+    require!(
+        project_slug.bytes().all(|byte| {
+            byte.is_ascii_lowercase() || byte.is_ascii_digit() || byte == b'-' || byte == b'_'
+        }),
+        StellarError::InvalidProjectSlug
+    );
+    Ok(())
 }
 
 pub fn create_release(
@@ -655,6 +669,35 @@ pub fn link_avatar_data(ctx: Context<LinkAvatarData>, avatar_data: Pubkey) -> Re
     emit!(ReleaseStatusChanged {
         release: release.key(),
         status: ReleaseStatus::Linked,
+    });
+
+    Ok(())
+}
+
+pub fn record_release_deployment(
+    ctx: Context<RecordReleaseDeployment>,
+    project_slug: String,
+    registry_program: Pubkey,
+    registry_record: Pubkey,
+) -> Result<()> {
+    validate_project_slug(&project_slug)?;
+
+    let release = &ctx.accounts.release;
+    require!(release.accepts_revenue(), StellarError::ReleaseNotFinalized);
+
+    let deployment = &mut ctx.accounts.deployment;
+    deployment.release = release.key();
+    deployment.project_slug = project_slug.clone();
+    deployment.registry_program = registry_program;
+    deployment.registry_record = registry_record;
+    deployment.deployed_at = Clock::get()?.unix_timestamp;
+    deployment.bump = ctx.bumps.deployment;
+
+    emit!(ReleaseDeploymentRecorded {
+        release: release.key(),
+        project_slug,
+        registry_program,
+        registry_record,
     });
 
     Ok(())

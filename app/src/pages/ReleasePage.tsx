@@ -4,7 +4,16 @@ import { PublicKey } from "@solana/web3.js";
 
 import { ensureClient, logSignature, useAppState } from "../App";
 import { Field, Panel } from "../components/Panel";
-import { deriveAsset, deriveRelease, deriveShare, deriveVault, safePublicKey, systemProgram } from "../lib/stellar";
+import {
+  deriveAsset,
+  deriveRelease,
+  deriveShare,
+  deriveVault,
+  lamportsFromSol,
+  safePublicKey,
+  systemProgram,
+} from "../lib/stellar";
+import { publishOmobaAvatarFromStellar } from "../lib/omobaRegistry";
 
 export function ReleasePage() {
   const state = useAppState();
@@ -14,17 +23,30 @@ export function ReleasePage() {
   const [contributor, setContributor] = useState("");
   const [shareBps, setShareBps] = useState("10000");
   const [avatarData, setAvatarData] = useState("");
+  const [omobaUriIpfsHash, setOmobaUriIpfsHash] = useState(
+    "QmOmobaAvatarMetadataHash"
+  );
+  const [omobaMaxSupply, setOmobaMaxSupply] = useState("1");
+  const [omobaMintFee, setOmobaMintFee] = useState("0");
   const [loading, setLoading] = useState(false);
 
   const universe = useMemo(
-    () => (state.addresses.universe ? new PublicKey(state.addresses.universe) : null),
-    [state.addresses.universe],
+    () =>
+      state.addresses.universe ? new PublicKey(state.addresses.universe) : null,
+    [state.addresses.universe]
   );
-  const release = universe ? deriveRelease(universe, Number(releaseIndex || "0")) : null;
-  const asset = universe ? deriveAsset(universe, Number(assetIndex || "0")) : null;
+  const release = universe
+    ? deriveRelease(universe, Number(releaseIndex || "0"))
+    : null;
+  const asset = universe
+    ? deriveAsset(universe, Number(assetIndex || "0"))
+    : null;
   const vault = release ? deriveVault(release) : null;
-  const contributorKey = contributor ? safePublicKey(contributor) : state.walletPublicKey;
-  const share = release && contributorKey ? deriveShare(release, contributorKey) : null;
+  const contributorKey = contributor
+    ? safePublicKey(contributor)
+    : state.walletPublicKey;
+  const share =
+    release && contributorKey ? deriveShare(release, contributorKey) : null;
 
   async function createRelease() {
     const client = ensureClient(state);
@@ -128,46 +150,176 @@ export function ReleasePage() {
     }
   }
 
+  async function publishOmobaAvatar() {
+    const client = ensureClient(state);
+    if (!client || !universe || !release || !vault || !omobaUriIpfsHash) return;
+    setLoading(true);
+    try {
+      const result = await publishOmobaAvatarFromStellar({
+        provider: client.provider,
+        universe,
+        release,
+        vault,
+        uriIpfsHash: omobaUriIpfsHash,
+        maxSupply: new anchor.BN(Number(omobaMaxSupply || "1")),
+        mintingFeePerMint: lamportsFromSol(omobaMintFee),
+      });
+      state.setAddresses((current) => ({
+        ...current,
+        omobaAvatarData: result.avatarData.toBase58(),
+        omobaStellarLink: result.stellarLink.toBase58(),
+        omobaReleaseLink: result.stellarReleaseLink.toBase58(),
+        omobaReleaseDeployment: result.stellarReleaseDeployment.toBase58(),
+      }));
+      logSignature(state, "Omoba avatar deployed", result.signature);
+      state.addLog(
+        "info",
+        "Omoba registry avatar",
+        JSON.stringify(
+          {
+            avatarIndex: result.avatarIndex,
+            avatarData: result.avatarData.toBase58(),
+            stellarLink: result.stellarLink.toBase58(),
+            stellarReleaseLink: result.stellarReleaseLink.toBase58(),
+            stellarReleaseDeployment:
+              result.stellarReleaseDeployment.toBase58(),
+          },
+          null,
+          2
+        )
+      );
+    } catch (error) {
+      state.addLog("error", "Deploy Omoba avatar failed", String(error));
+    } finally {
+      setLoading(false);
+    }
+  }
+
   async function fetchRelease() {
     const client = ensureClient(state);
     if (!client || !release) return;
     try {
       const account = await client.program.account.release.fetch(release);
-      state.addLog("success", "Release fetched", JSON.stringify(account, null, 2));
+      state.addLog(
+        "success",
+        "Release fetched",
+        JSON.stringify(account, null, 2)
+      );
     } catch (error) {
       state.addLog("error", "Fetch release failed", String(error));
     }
   }
 
   return (
-    <Panel title="Release" description="Create an immutable release and configure contributor shares.">
+    <Panel
+      title="Release"
+      description="Create an immutable release and configure contributor shares."
+    >
       <div className="form-grid">
         <Field label="Release index">
-          <input value={releaseIndex} onChange={(event) => setReleaseIndex(event.target.value)} />
+          <input
+            value={releaseIndex}
+            onChange={(event) => setReleaseIndex(event.target.value)}
+          />
         </Field>
         <Field label="Final asset index">
-          <input value={assetIndex} onChange={(event) => setAssetIndex(event.target.value)} />
+          <input
+            value={assetIndex}
+            onChange={(event) => setAssetIndex(event.target.value)}
+          />
         </Field>
         <Field label="Release metadata hash">
-          <input value={metadataHash} onChange={(event) => setMetadataHash(event.target.value)} />
+          <input
+            value={metadataHash}
+            onChange={(event) => setMetadataHash(event.target.value)}
+          />
         </Field>
-        <Field label="Contributor wallet" hint="Leave empty to use the connected wallet.">
-          <input value={contributor} onChange={(event) => setContributor(event.target.value)} />
+        <Field
+          label="Contributor wallet"
+          hint="Leave empty to use the connected wallet."
+        >
+          <input
+            value={contributor}
+            onChange={(event) => setContributor(event.target.value)}
+          />
         </Field>
         <Field label="Share BPS">
-          <input value={shareBps} onChange={(event) => setShareBps(event.target.value)} />
+          <input
+            value={shareBps}
+            onChange={(event) => setShareBps(event.target.value)}
+          />
         </Field>
         <Field label="Avatar data PDA" hint="Optional, after finalize.">
-          <input value={avatarData} onChange={(event) => setAvatarData(event.target.value)} />
+          <input
+            value={avatarData}
+            onChange={(event) => setAvatarData(event.target.value)}
+          />
+        </Field>
+        <Field
+          label="Omoba metadata hash"
+          hint="Stored in solana-omoba-registry for this release."
+        >
+          <input
+            value={omobaUriIpfsHash}
+            onChange={(event) => setOmobaUriIpfsHash(event.target.value)}
+          />
+        </Field>
+        <Field label="Omoba max supply">
+          <input
+            value={omobaMaxSupply}
+            onChange={(event) => setOmobaMaxSupply(event.target.value)}
+          />
+        </Field>
+        <Field
+          label="Omoba mint fee SOL"
+          hint="Kept in the registry record for future minting/indexing flows."
+        >
+          <input
+            value={omobaMintFee}
+            onChange={(event) => setOmobaMintFee(event.target.value)}
+          />
         </Field>
       </div>
 
       <div className="actions">
-        <button disabled={loading || !release} onClick={createRelease}>Create Release</button>
-        <button className="secondary" disabled={loading || !share} onClick={addShare}>Add Share</button>
-        <button className="secondary" disabled={loading || !release} onClick={finalizeRelease}>Finalize</button>
-        <button className="secondary" disabled={loading || !avatarData} onClick={linkAvatarData}>Link Avatar</button>
-        <button className="secondary" disabled={!release} onClick={fetchRelease}>Fetch</button>
+        <button disabled={loading || !release} onClick={createRelease}>
+          Create Release
+        </button>
+        <button
+          className="secondary"
+          disabled={loading || !share}
+          onClick={addShare}
+        >
+          Add Share
+        </button>
+        <button
+          className="secondary"
+          disabled={loading || !release}
+          onClick={finalizeRelease}
+        >
+          Finalize
+        </button>
+        <button
+          className="secondary"
+          disabled={loading || !avatarData}
+          onClick={linkAvatarData}
+        >
+          Link Avatar
+        </button>
+        <button
+          className="secondary"
+          disabled={loading || !release || !vault || !omobaUriIpfsHash}
+          onClick={publishOmobaAvatar}
+        >
+          Deploy Omoba
+        </button>
+        <button
+          className="secondary"
+          disabled={!release}
+          onClick={fetchRelease}
+        >
+          Fetch
+        </button>
       </div>
 
       {release && vault ? (

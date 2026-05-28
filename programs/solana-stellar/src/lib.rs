@@ -138,6 +138,15 @@ pub mod solana_stellar {
         handlers::link_avatar_data(ctx, avatar_data)
     }
 
+    pub fn record_release_deployment(
+        ctx: Context<RecordReleaseDeployment>,
+        project_slug: String,
+        registry_program: Pubkey,
+        registry_record: Pubkey,
+    ) -> Result<()> {
+        handlers::record_release_deployment(ctx, project_slug, registry_program, registry_record)
+    }
+
     pub fn deposit_revenue(ctx: Context<DepositRevenue>, amount: u64) -> Result<()> {
         handlers::deposit_revenue(ctx, amount)
     }
