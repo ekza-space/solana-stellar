@@ -4,6 +4,7 @@ const anchor = require("@coral-xyz/anchor");
 const crypto = require("node:crypto");
 const fs = require("node:fs");
 const path = require("node:path");
+const { execFileSync } = require("node:child_process");
 const {
   addAssetParent,
   approveAsset,
@@ -32,6 +33,7 @@ function parseArgs(argv) {
     dumpDir: null,
     endpoint: DEFAULT_ENDPOINT,
     metadataBaseUrl: "http://127.0.0.1:8787",
+    ipfsApi: "http://127.0.0.1:5001/api/v0/add",
     newUniverse: false,
     dryRun: false,
     airdropSol: 10,
@@ -51,6 +53,9 @@ function parseArgs(argv) {
       index += 1;
     } else if (arg === "--metadata-base-url" && next) {
       args.metadataBaseUrl = next.replace(/\/+$/, "");
+      index += 1;
+    } else if (arg === "--ipfs-api" && next) {
+      args.ipfsApi = next;
       index += 1;
     } else if (arg === "--airdrop-sol" && next) {
       args.airdropSol = Number(next);
@@ -147,6 +152,25 @@ function urlForRelativePath(relativePath, metadataBaseUrl) {
 
 function pointerForFile(folder, file, metadataBaseUrl) {
   return urlForRelativePath(path.relative(folder, file), metadataBaseUrl);
+}
+
+// Pin a file to IPFS (local Kubo by default) and return its bare CID.
+// On-chain we store ONLY this content hash — never a gateway URL. The CID is
+// identical whether the bytes live in local Kubo or Pinata, so the same
+// on-chain record resolves through any gateway.
+function ipfsAdd(filePath, ipfsApi) {
+  const url = `${ipfsApi}${ipfsApi.includes("?") ? "&" : "?"}cid-version=0&pin=true`;
+  const out = execFileSync(
+    "curl",
+    ["-s", "-X", "POST", "-F", `file=@${filePath}`, url],
+    { encoding: "utf8", maxBuffer: 256 * 1024 * 1024 }
+  );
+  const lastLine = out.trim().split("\n").filter(Boolean).pop() || "{}";
+  const cid = JSON.parse(lastLine).Hash;
+  if (!cid) {
+    throw new Error(`IPFS add returned no CID for ${filePath}: ${out}`);
+  }
+  return cid;
 }
 
 function assertOnChainPointer(value, label) {
@@ -396,7 +420,8 @@ function prepareMedia({ args, serviceDir, sourceFile, prefix }) {
   const filename = `${safeSlug(prefix)}-${sha256.slice(0, 16)}${extension}`;
   const destination = path.join(serviceDir, "media", filename);
   copyOrLink(sourceFile, destination);
-  const url = pointerForFile(args.folder, destination, args.metadataBaseUrl);
+  // Store the bare IPFS CID on-chain, not a gateway URL.
+  const url = ipfsAdd(destination, args.ipfsApi);
   assertOnChainPointer(url, "media pointer");
   const stats = fs.statSync(sourceFile);
   return {
@@ -410,11 +435,8 @@ function prepareMedia({ args, serviceDir, sourceFile, prefix }) {
 }
 
 function metadataPointer(args, metadataFile) {
-  const pointer = pointerForFile(
-    args.folder,
-    metadataFile,
-    args.metadataBaseUrl
-  );
+  // The on-chain metadata pointer is the metadata JSON's bare IPFS CID.
+  const pointer = ipfsAdd(metadataFile, args.ipfsApi);
   assertOnChainPointer(pointer, "metadata pointer");
   return pointer;
 }
