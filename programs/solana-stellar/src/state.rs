@@ -160,13 +160,13 @@ impl ContributorShare {
     pub const INIT_SPACE: usize = 32 + 32 + 2 + 8 + 1;
 }
 
-#[derive(AnchorSerialize, AnchorDeserialize, Clone, Copy, PartialEq, Eq)]
+#[derive(AnchorSerialize, AnchorDeserialize, Clone, Copy, Debug, PartialEq, Eq)]
 pub enum UniverseStatus {
     Active,
     Closed,
 }
 
-#[derive(AnchorSerialize, AnchorDeserialize, Clone, Copy, PartialEq, Eq)]
+#[derive(AnchorSerialize, AnchorDeserialize, Clone, Copy, Debug, PartialEq, Eq)]
 pub enum CollaborationPolicy {
     Equal,
     LineageEqual,
@@ -174,7 +174,7 @@ pub enum CollaborationPolicy {
     Custom,
 }
 
-#[derive(AnchorSerialize, AnchorDeserialize, Clone, Copy, PartialEq, Eq)]
+#[derive(AnchorSerialize, AnchorDeserialize, Clone, Copy, Debug, PartialEq, Eq)]
 pub enum AssetKind {
     Image,
     Model3d,
@@ -185,7 +185,7 @@ pub enum AssetKind {
     Other,
 }
 
-#[derive(AnchorSerialize, AnchorDeserialize, Clone, Copy, PartialEq, Eq)]
+#[derive(AnchorSerialize, AnchorDeserialize, Clone, Copy, Debug, PartialEq, Eq)]
 pub enum AssetSubtype {
     Concept,
     Sketch,
@@ -198,7 +198,7 @@ pub enum AssetSubtype {
     Other,
 }
 
-#[derive(AnchorSerialize, AnchorDeserialize, Clone, Copy, PartialEq, Eq)]
+#[derive(AnchorSerialize, AnchorDeserialize, Clone, Copy, Debug, PartialEq, Eq)]
 pub enum LicenseKind {
     Unknown,
     AllRightsReserved,
@@ -211,7 +211,7 @@ pub enum LicenseKind {
     Custom,
 }
 
-#[derive(AnchorSerialize, AnchorDeserialize, Clone, Copy, PartialEq, Eq)]
+#[derive(AnchorSerialize, AnchorDeserialize, Clone, Copy, Debug, PartialEq, Eq)]
 pub enum AssetStatus {
     Draft,
     Submitted,
@@ -222,7 +222,7 @@ pub enum AssetStatus {
     Archived,
 }
 
-#[derive(AnchorSerialize, AnchorDeserialize, Clone, Copy, PartialEq, Eq)]
+#[derive(AnchorSerialize, AnchorDeserialize, Clone, Copy, Debug, PartialEq, Eq)]
 pub enum ReleaseStatus {
     Draft,
     Finalized,

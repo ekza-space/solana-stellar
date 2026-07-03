@@ -11,6 +11,7 @@ export const STELLAR_SEEDS = {
   link: "link",
   release: "release",
   releaseVault: "release_vault",
+  releaseDeployment: "release_deployment",
   share: "share",
 } as const;
 
@@ -59,6 +60,22 @@ export function deriveRelease(universe: PublicKey, index: number) {
 export function deriveVault(release: PublicKey) {
   return PublicKey.findProgramAddressSync(
     [asciiSeed(STELLAR_SEEDS.releaseVault), release.toBuffer()],
+    PROGRAM_ID
+  )[0];
+}
+
+/**
+ * Per-release, per-project bridge record (`record_release_deployment`).
+ * Every consumer app (arena, avatar, omoba, …) records its own slug here —
+ * this is the canonical way to discover where a release was published.
+ */
+export function deriveReleaseDeployment(release: PublicKey, projectSlug: string) {
+  return PublicKey.findProgramAddressSync(
+    [
+      asciiSeed(STELLAR_SEEDS.releaseDeployment),
+      release.toBuffer(),
+      asciiSeed(projectSlug),
+    ],
     PROGRAM_ID
   )[0];
 }
