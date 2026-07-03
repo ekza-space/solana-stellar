@@ -7,6 +7,7 @@ import {
   deriveAsset,
   deriveAssetParent,
   deriveRegistry,
+  deriveProjectProfile,
   deriveRelease,
   deriveShare,
   deriveVault,
@@ -409,6 +410,35 @@ export async function finalizeWeightedRelease(
     .rpc();
 
   return { signature };
+}
+
+/** Register/update a consumer app's capability card (supported model formats). */
+export async function registerProjectProfile(
+  client: StellarClient,
+  args: {
+    projectSlug: string;
+    registryProgram: PublicKey;
+    supportedFormats: string[];
+    metadataHash?: string;
+    authority: PublicKey;
+  }
+) {
+  const profile = deriveProjectProfile(args.projectSlug);
+  const signature = await client.program.methods
+    .registerProjectProfile(
+      args.projectSlug,
+      args.registryProgram,
+      args.supportedFormats,
+      args.metadataHash ?? ""
+    )
+    .accountsStrict({
+      profile,
+      authority: args.authority,
+      systemProgram: systemProgram(),
+    })
+    .rpc();
+
+  return { profile, signature };
 }
 
 export async function linkAvatarData(

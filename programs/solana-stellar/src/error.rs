@@ -56,4 +56,6 @@ pub enum StellarError {
     InsufficientVaultBalance,
     #[msg("Numerical overflow occurred.")]
     NumericalOverflow,
+    #[msg("Invalid model format id (lowercase slug, max 16 chars, max 8 entries).")]
+    InvalidModelFormat,
 }

@@ -1,6 +1,8 @@
 use anchor_lang::prelude::*;
 
-use crate::constants::{MAX_HASH_LEN, MAX_PROJECT_SLUG_LEN};
+use crate::constants::{
+    MAX_HASH_LEN, MAX_MODEL_FORMAT_LEN, MAX_PROJECT_SLUG_LEN, MAX_SUPPORTED_FORMATS,
+};
 
 #[account]
 pub struct Registry {
@@ -135,6 +137,36 @@ pub struct ReleaseDeployment {
 
 impl ReleaseDeployment {
     pub const INIT_SPACE: usize = 32 + (4 + MAX_PROJECT_SLUG_LEN) + 32 + 32 + 8 + 1;
+}
+
+/// Public capability card of a consumer app (per `project_slug`): which model
+/// formats it can actually use ("vrm", "glb", …). Registered once by the
+/// consumer's operator; wallets/consoles read it to warn BEFORE bridging a
+/// release whose model format the target app cannot load. One per slug —
+/// first registrant becomes the authority; only the authority can update.
+#[account]
+pub struct ProjectProfile {
+    pub authority: Pubkey,
+    pub project_slug: String,
+    /// The consumer program this profile describes.
+    pub registry_program: Pubkey,
+    /// Lowercase model-format ids the app supports (vocabulary in
+    /// docs/INTEGRATION.md): e.g. ["vrm", "glb"].
+    pub supported_formats: Vec<String>,
+    /// Pointer to a JSON with app name/description/links (≤96 chars).
+    pub metadata_hash: String,
+    pub updated_at: i64,
+    pub bump: u8,
+}
+
+impl ProjectProfile {
+    pub const INIT_SPACE: usize = 32
+        + (4 + MAX_PROJECT_SLUG_LEN)
+        + 32
+        + (4 + MAX_SUPPORTED_FORMATS * (4 + MAX_MODEL_FORMAT_LEN))
+        + (4 + MAX_HASH_LEN)
+        + 8
+        + 1;
 }
 
 #[account]

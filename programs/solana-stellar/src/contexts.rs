@@ -2,13 +2,13 @@ use anchor_lang::prelude::*;
 
 use crate::{
     constants::{
-        ASSET_SEED, LINK_SEED, REGISTRY_SEED, RELEASE_DEPLOYMENT_SEED, RELEASE_SEED, SHARE_SEED,
-        UNIVERSE_INDEX_SEED, UNIVERSE_SEED, VAULT_SEED,
+        ASSET_SEED, LINK_SEED, PROJECT_PROFILE_SEED, REGISTRY_SEED, RELEASE_DEPLOYMENT_SEED,
+        RELEASE_SEED, SHARE_SEED, UNIVERSE_INDEX_SEED, UNIVERSE_SEED, VAULT_SEED,
     },
     error::StellarError,
     state::{
-        Asset, AssetParent, AssetStatus, ContributorShare, Registry, Release, ReleaseDeployment,
-        ReleaseVault, Universe, UniverseIndex,
+        Asset, AssetParent, AssetStatus, ContributorShare, ProjectProfile, Registry, Release,
+        ReleaseDeployment, ReleaseVault, Universe, UniverseIndex,
     },
 };
 
@@ -298,6 +298,26 @@ pub struct RecordReleaseDeployment<'info> {
         bump
     )]
     pub deployment: Account<'info, ReleaseDeployment>,
+    #[account(mut)]
+    pub authority: Signer<'info>,
+    pub system_program: Program<'info, System>,
+}
+
+/// Register or update the public capability card of a consumer app
+/// (`ProjectProfile`, one per project slug). First registrant of a slug
+/// becomes its authority; subsequent updates must be signed by that authority
+/// (enforced in the handler, since `init_if_needed` cannot express it).
+#[derive(Accounts)]
+#[instruction(project_slug: String)]
+pub struct RegisterProjectProfile<'info> {
+    #[account(
+        init_if_needed,
+        payer = authority,
+        space = 8 + ProjectProfile::INIT_SPACE,
+        seeds = [PROJECT_PROFILE_SEED, project_slug.as_bytes()],
+        bump
+    )]
+    pub profile: Account<'info, ProjectProfile>,
     #[account(mut)]
     pub authority: Signer<'info>,
     pub system_program: Program<'info, System>,

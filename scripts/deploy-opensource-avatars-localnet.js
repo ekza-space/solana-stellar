@@ -410,6 +410,7 @@ async function publishToArena({
     JSON.stringify(
       {
         type: "arena-avatar-card",
+        format: "vrm", // model-format classifier (docs/INTEGRATION.md)
         name: avatar.meta.name,
         description: `${avatar.meta.name} — Open Source Avatars skin published from Stellar release ${release.toBase58()}.`,
         image: avatar.thumbnailPointer || avatar.meta.thumbnail_url || "",
@@ -625,7 +626,7 @@ async function seedAvatar({
         inherited_from_asset: projectAsset.toBase58(),
         medium_type: "3d",
         medium_sub_type: "model",
-        format: "VRM",
+        format: "vrm", // model-format classifier (docs/INTEGRATION.md)
         ipfs_hash: modelPointer,
         preview_ipfs_hash: previewPointer,
         source_model_url: meta.model_file_url,

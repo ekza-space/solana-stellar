@@ -77,13 +77,49 @@ Your "register from Stellar" instruction should:
   the universe owner, target program must exist on the selected cluster
   (see `ekza-stellar/src/contracts/entities/actions.ts` `execPublishArenaAsset`).
 
+## Model formats (avatar/asset classifier)
+
+Bridging breaks silently when the consumer app cannot load the release's
+model container (a VRM avatar published into an app that only loads plain
+GLB, etc.). Two pieces make this transparent:
+
+1. **Release side — classify the asset.** The model asset's metadata JSON
+   MUST carry a `format` field with a lowercase id from this vocabulary:
+
+   | id | container |
+   |---|---|
+   | `vrm` | VRM avatar (glTF-binary container with VRM extensions) |
+   | `glb` | binary glTF scene/model |
+   | `gltf` | JSON glTF |
+   | `fbx` | Autodesk FBX |
+   | `obj` | Wavefront OBJ |
+   | `vox` | MagicaVoxel |
+
+   Seeding scripts already write it (see
+   `scripts/deploy-opensource-avatars-localnet.js`); the console should
+   surface it on the release card.
+
+2. **Consumer side — declare what you support.** Each consumer app registers
+   a `ProjectProfile` PDA (`[b"project_profile", slug]`, instruction
+   `register_project_profile`) listing its `supported_formats`. First
+   registrant of a slug becomes the profile authority; only that authority
+   can update it. Registered via
+   `scripts/register-project-profiles-localnet.js`; read via SDK
+   `deriveProjectProfile(slug)`.
+
+   Consoles/wallets MUST check the release's `format` against the target
+   app's `supported_formats` before offering a publish action, and show the
+   supported list next to the button ("Arena supports: vrm, glb"). A mismatch
+   is a warning, not an on-chain block — the profile is a capability
+   declaration, not an enforcement gate.
+
 ## Known consumers
 
-| App | Program | Slug | Revenue CPI | Notes |
-|---|---|---|---|---|
-| Ekza Arena | `D3a99Wj…M8iZ` | `arena` | no | reference implementation |
-| Solana Avatars (minter) | `29KLLA…4TKz` | — (debt: does not record deployment yet) | `deposit_revenue` per mint | |
-| Omoba registry | `solana-omoba-registry` | `omoba` | — | |
+| App | Program | Slug | Formats | Revenue CPI | Notes |
+|---|---|---|---|---|---|
+| Ekza Arena | `D3a99Wj…M8iZ` | `arena` | vrm, glb | no | reference implementation |
+| Solana Avatars (minter) | `29KLLA…4TKz` | — (debt: does not record deployment yet) | glb | `deposit_revenue` per mint | |
+| Omoba (game client) | — | `omoba` | vrm, glb | — | consumes arena cards; profile registered without a registry program |
 
 ## Compatibility policy
 

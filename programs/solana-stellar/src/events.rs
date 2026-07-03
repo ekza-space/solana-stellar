@@ -80,6 +80,14 @@ pub struct ReleaseDeploymentRecorded {
 }
 
 #[event]
+pub struct ProjectProfileRegistered {
+    pub project_slug: String,
+    pub registry_program: Pubkey,
+    pub supported_formats: Vec<String>,
+    pub authority: Pubkey,
+}
+
+#[event]
 pub struct RevenueDeposited {
     pub release: Pubkey,
     pub vault: Pubkey,

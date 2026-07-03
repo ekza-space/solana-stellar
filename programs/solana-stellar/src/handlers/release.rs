@@ -2,15 +2,19 @@ use anchor_lang::prelude::*;
 use anchor_lang::solana_program::{program::invoke_signed, system_instruction};
 
 use crate::{
-    constants::{BPS_DENOMINATOR, MAX_PROJECT_SLUG_LEN, SHARE_SEED},
+    constants::{
+        BPS_DENOMINATOR, MAX_MODEL_FORMAT_LEN, MAX_PROJECT_SLUG_LEN, MAX_SUPPORTED_FORMATS,
+        SHARE_SEED,
+    },
     contexts::{
         AddReleaseShare, CreateRelease, FinalizeLineageEqualRelease, FinalizeRelease,
-        LinkAvatarData, RecordReleaseDeployment,
+        LinkAvatarData, RecordReleaseDeployment, RegisterProjectProfile,
     },
     error::StellarError,
     events::{
-        AssetStatusChanged, AvatarDataLinked, ReleaseCreated, ReleaseDeploymentRecorded,
-        ReleaseDistributionModelSet, ReleaseShareAdded, ReleaseStatusChanged,
+        AssetStatusChanged, AvatarDataLinked, ProjectProfileRegistered, ReleaseCreated,
+        ReleaseDeploymentRecorded, ReleaseDistributionModelSet, ReleaseShareAdded,
+        ReleaseStatusChanged,
     },
     state::{
         Asset, AssetParent, AssetStatus, CollaborationPolicy, ContributorShare, ReleaseStatus,
@@ -698,6 +702,63 @@ pub fn record_release_deployment(
         project_slug,
         registry_program,
         registry_record,
+    });
+
+    Ok(())
+}
+
+/// Register or update a consumer app's public capability card (spec:
+/// docs/INTEGRATION.md "Model formats"). One profile per project slug; the
+/// first registrant becomes the authority, later updates must be signed by it.
+pub fn register_project_profile(
+    ctx: Context<RegisterProjectProfile>,
+    project_slug: String,
+    registry_program: Pubkey,
+    supported_formats: Vec<String>,
+    metadata_hash: String,
+) -> Result<()> {
+    validate_project_slug(&project_slug)?;
+    require!(
+        !supported_formats.is_empty() && supported_formats.len() <= MAX_SUPPORTED_FORMATS,
+        StellarError::InvalidModelFormat
+    );
+    for format in &supported_formats {
+        require!(
+            !format.is_empty()
+                && format.len() <= MAX_MODEL_FORMAT_LEN
+                && format.bytes().all(|byte| {
+                    byte.is_ascii_lowercase() || byte.is_ascii_digit() || byte == b'-' || byte == b'_'
+                }),
+            StellarError::InvalidModelFormat
+        );
+    }
+    if !metadata_hash.is_empty() {
+        validate_hash(&metadata_hash)?;
+    }
+
+    let profile = &mut ctx.accounts.profile;
+    // First-come ownership of the slug: an existing profile can only be
+    // updated by its recorded authority.
+    if profile.authority != Pubkey::default() {
+        require_keys_eq!(
+            profile.authority,
+            ctx.accounts.authority.key(),
+            StellarError::Unauthorized
+        );
+    }
+    profile.authority = ctx.accounts.authority.key();
+    profile.project_slug = project_slug.clone();
+    profile.registry_program = registry_program;
+    profile.supported_formats = supported_formats.clone();
+    profile.metadata_hash = metadata_hash;
+    profile.updated_at = Clock::get()?.unix_timestamp;
+    profile.bump = ctx.bumps.profile;
+
+    emit!(ProjectProfileRegistered {
+        project_slug,
+        registry_program,
+        supported_formats,
+        authority: ctx.accounts.authority.key(),
     });
 
     Ok(())

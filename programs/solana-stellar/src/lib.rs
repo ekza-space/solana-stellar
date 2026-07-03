@@ -138,6 +138,24 @@ pub mod solana_stellar {
         handlers::link_avatar_data(ctx, avatar_data)
     }
 
+    /// Register/update a consumer app's capability card (supported model
+    /// formats, e.g. ["vrm", "glb"]). See docs/INTEGRATION.md.
+    pub fn register_project_profile(
+        ctx: Context<RegisterProjectProfile>,
+        project_slug: String,
+        registry_program: Pubkey,
+        supported_formats: Vec<String>,
+        metadata_hash: String,
+    ) -> Result<()> {
+        handlers::register_project_profile(
+            ctx,
+            project_slug,
+            registry_program,
+            supported_formats,
+            metadata_hash,
+        )
+    }
+
     pub fn record_release_deployment(
         ctx: Context<RecordReleaseDeployment>,
         project_slug: String,

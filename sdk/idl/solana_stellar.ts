@@ -822,6 +822,77 @@ export type SolanaStellar = {
       ];
     },
     {
+      name: "registerProjectProfile";
+      docs: [
+        "Register/update a consumer app's capability card (supported model",
+        'formats, e.g. ["vrm", "glb"]). See docs/INTEGRATION.md.'
+      ];
+      discriminator: [137, 2, 234, 92, 42, 245, 185, 239];
+      accounts: [
+        {
+          name: "profile";
+          writable: true;
+          pda: {
+            seeds: [
+              {
+                kind: "const";
+                value: [
+                  112,
+                  114,
+                  111,
+                  106,
+                  101,
+                  99,
+                  116,
+                  95,
+                  112,
+                  114,
+                  111,
+                  102,
+                  105,
+                  108,
+                  101
+                ];
+              },
+              {
+                kind: "arg";
+                path: "projectSlug";
+              }
+            ];
+          };
+        },
+        {
+          name: "authority";
+          writable: true;
+          signer: true;
+        },
+        {
+          name: "systemProgram";
+          address: "11111111111111111111111111111111";
+        }
+      ];
+      args: [
+        {
+          name: "projectSlug";
+          type: "string";
+        },
+        {
+          name: "registryProgram";
+          type: "pubkey";
+        },
+        {
+          name: "supportedFormats";
+          type: {
+            vec: "string";
+          };
+        },
+        {
+          name: "metadataHash";
+          type: "string";
+        }
+      ];
+    },
+    {
       name: "rejectAsset";
       discriminator: [79, 96, 89, 56, 10, 45, 227, 217];
       accounts: [
@@ -941,6 +1012,10 @@ export type SolanaStellar = {
       discriminator: [146, 88, 198, 243, 240, 238, 221, 182];
     },
     {
+      name: "projectProfile";
+      discriminator: [154, 208, 81, 229, 211, 58, 79, 232];
+    },
+    {
       name: "registry";
       discriminator: [47, 174, 110, 246, 184, 182, 252, 218];
     },
@@ -981,6 +1056,10 @@ export type SolanaStellar = {
     {
       name: "avatarDataLinked";
       discriminator: [189, 148, 22, 111, 17, 129, 142, 202];
+    },
+    {
+      name: "projectProfileRegistered";
+      discriminator: [109, 212, 22, 48, 47, 152, 234, 173];
     },
     {
       name: "releaseCreated";
@@ -1154,6 +1233,11 @@ export type SolanaStellar = {
       code: 6026;
       name: "numericalOverflow";
       msg: "Numerical overflow occurred.";
+    },
+    {
+      code: 6027;
+      name: "invalidModelFormat";
+      msg: "Invalid model format id (lowercase slug, max 16 chars, max 8 entries).";
     }
   ];
   types: [
@@ -1520,6 +1604,85 @@ export type SolanaStellar = {
           },
           {
             name: "custom";
+          }
+        ];
+      };
+    },
+    {
+      name: "projectProfile";
+      docs: [
+        "Public capability card of a consumer app (per `project_slug`): which model",
+        'formats it can actually use ("vrm", "glb", …). Registered once by the',
+        "consumer's operator; wallets/consoles read it to warn BEFORE bridging a",
+        "release whose model format the target app cannot load. One per slug —",
+        "first registrant becomes the authority; only the authority can update."
+      ];
+      type: {
+        kind: "struct";
+        fields: [
+          {
+            name: "authority";
+            type: "pubkey";
+          },
+          {
+            name: "projectSlug";
+            type: "string";
+          },
+          {
+            name: "registryProgram";
+            docs: ["The consumer program this profile describes."];
+            type: "pubkey";
+          },
+          {
+            name: "supportedFormats";
+            docs: [
+              "Lowercase model-format ids the app supports (vocabulary in",
+              'docs/INTEGRATION.md): e.g. ["vrm", "glb"].'
+            ];
+            type: {
+              vec: "string";
+            };
+          },
+          {
+            name: "metadataHash";
+            docs: [
+              "Pointer to a JSON with app name/description/links (≤96 chars)."
+            ];
+            type: "string";
+          },
+          {
+            name: "updatedAt";
+            type: "i64";
+          },
+          {
+            name: "bump";
+            type: "u8";
+          }
+        ];
+      };
+    },
+    {
+      name: "projectProfileRegistered";
+      type: {
+        kind: "struct";
+        fields: [
+          {
+            name: "projectSlug";
+            type: "string";
+          },
+          {
+            name: "registryProgram";
+            type: "pubkey";
+          },
+          {
+            name: "supportedFormats";
+            type: {
+              vec: "string";
+            };
+          },
+          {
+            name: "authority";
+            type: "pubkey";
           }
         ];
       };

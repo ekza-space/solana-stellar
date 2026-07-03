@@ -740,6 +740,64 @@
       ]
     },
     {
+      "name": "register_project_profile",
+      "docs": [
+        "Register/update a consumer app's capability card (supported model",
+        "formats, e.g. [\"vrm\", \"glb\"]). See docs/INTEGRATION.md."
+      ],
+      "discriminator": [137, 2, 234, 92, 42, 245, 185, 239],
+      "accounts": [
+        {
+          "name": "profile",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112, 114, 111, 106, 101, 99, 116, 95, 112, 114, 111, 102, 105,
+                  108, 101
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "project_slug"
+              }
+            ]
+          }
+        },
+        {
+          "name": "authority",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "project_slug",
+          "type": "string"
+        },
+        {
+          "name": "registry_program",
+          "type": "pubkey"
+        },
+        {
+          "name": "supported_formats",
+          "type": {
+            "vec": "string"
+          }
+        },
+        {
+          "name": "metadata_hash",
+          "type": "string"
+        }
+      ]
+    },
+    {
       "name": "reject_asset",
       "discriminator": [79, 96, 89, 56, 10, 45, 227, 217],
       "accounts": [
@@ -859,6 +917,10 @@
       "discriminator": [146, 88, 198, 243, 240, 238, 221, 182]
     },
     {
+      "name": "ProjectProfile",
+      "discriminator": [154, 208, 81, 229, 211, 58, 79, 232]
+    },
+    {
       "name": "Registry",
       "discriminator": [47, 174, 110, 246, 184, 182, 252, 218]
     },
@@ -899,6 +961,10 @@
     {
       "name": "AvatarDataLinked",
       "discriminator": [189, 148, 22, 111, 17, 129, 142, 202]
+    },
+    {
+      "name": "ProjectProfileRegistered",
+      "discriminator": [109, 212, 22, 48, 47, 152, 234, 173]
     },
     {
       "name": "ReleaseCreated",
@@ -1072,6 +1138,11 @@
       "code": 6026,
       "name": "NumericalOverflow",
       "msg": "Numerical overflow occurred."
+    },
+    {
+      "code": 6027,
+      "name": "InvalidModelFormat",
+      "msg": "Invalid model format id (lowercase slug, max 16 chars, max 8 entries)."
     }
   ],
   "types": [
@@ -1438,6 +1509,85 @@
           },
           {
             "name": "Custom"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ProjectProfile",
+      "docs": [
+        "Public capability card of a consumer app (per `project_slug`): which model",
+        "formats it can actually use (\"vrm\", \"glb\", …). Registered once by the",
+        "consumer's operator; wallets/consoles read it to warn BEFORE bridging a",
+        "release whose model format the target app cannot load. One per slug —",
+        "first registrant becomes the authority; only the authority can update."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "authority",
+            "type": "pubkey"
+          },
+          {
+            "name": "project_slug",
+            "type": "string"
+          },
+          {
+            "name": "registry_program",
+            "docs": ["The consumer program this profile describes."],
+            "type": "pubkey"
+          },
+          {
+            "name": "supported_formats",
+            "docs": [
+              "Lowercase model-format ids the app supports (vocabulary in",
+              "docs/INTEGRATION.md): e.g. [\"vrm\", \"glb\"]."
+            ],
+            "type": {
+              "vec": "string"
+            }
+          },
+          {
+            "name": "metadata_hash",
+            "docs": [
+              "Pointer to a JSON with app name/description/links (≤96 chars)."
+            ],
+            "type": "string"
+          },
+          {
+            "name": "updated_at",
+            "type": "i64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ProjectProfileRegistered",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "project_slug",
+            "type": "string"
+          },
+          {
+            "name": "registry_program",
+            "type": "pubkey"
+          },
+          {
+            "name": "supported_formats",
+            "type": {
+              "vec": "string"
+            }
+          },
+          {
+            "name": "authority",
+            "type": "pubkey"
           }
         ]
       }

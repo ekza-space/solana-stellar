@@ -12,6 +12,7 @@ export const STELLAR_SEEDS = {
   release: "release",
   releaseVault: "release_vault",
   releaseDeployment: "release_deployment",
+  projectProfile: "project_profile",
   share: "share",
 } as const;
 
@@ -76,6 +77,17 @@ export function deriveReleaseDeployment(release: PublicKey, projectSlug: string)
       release.toBuffer(),
       asciiSeed(projectSlug),
     ],
+    PROGRAM_ID
+  )[0];
+}
+
+/**
+ * Consumer app capability card (`register_project_profile`): which model
+ * formats ("vrm", "glb", ...) the app behind `projectSlug` supports.
+ */
+export function deriveProjectProfile(projectSlug: string) {
+  return PublicKey.findProgramAddressSync(
+    [asciiSeed(STELLAR_SEEDS.projectProfile), asciiSeed(projectSlug)],
     PROGRAM_ID
   )[0];
 }
