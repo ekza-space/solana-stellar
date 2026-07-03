@@ -8,6 +8,7 @@ const DEFAULT_FOLDER = path.resolve(__dirname, "../univerces/everything");
 const MIME_TYPES = {
   ".json": "application/json; charset=utf-8",
   ".glb": "model/gltf-binary",
+  ".vrm": "model/gltf-binary",
   ".obj": "text/plain; charset=utf-8",
   ".mtl": "text/plain; charset=utf-8",
   ".png": "image/png",
