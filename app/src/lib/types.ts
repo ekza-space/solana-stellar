@@ -15,6 +15,10 @@ export type KnownAddresses = {
   vault?: string;
   ownerShare?: string;
   collaboratorShare?: string;
+  arenaAsset?: string;
+  arenaStellarLink?: string;
+  arenaReleaseLink?: string;
+  arenaReleaseDeployment?: string;
   omobaAvatarData?: string;
   omobaStellarLink?: string;
   omobaReleaseLink?: string;

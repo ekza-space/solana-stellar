@@ -7,6 +7,7 @@ import idl from "../../../target/idl/solana_stellar.json";
 import type { SolanaStellar } from "../../../target/types/solana_stellar";
 
 export const PROGRAM_ID = new PublicKey(idl.address);
+export const RELEASE_DEPLOYMENT_PROJECT_ARENA = "arena";
 export const RELEASE_DEPLOYMENT_PROJECT_OMOBA = "omoba";
 
 export type StellarClient = {

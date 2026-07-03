@@ -5,6 +5,11 @@ import { PublicKey } from "@solana/web3.js";
 import { ensureClient, logSignature, useAppState } from "../App";
 import { Field, Panel } from "../components/Panel";
 import {
+  arenaEnum,
+  type ArenaCardKind,
+  publishArenaAssetFromStellar,
+} from "../lib/arenaRegistry";
+import {
   deriveAsset,
   deriveRelease,
   deriveShare,
@@ -15,6 +20,28 @@ import {
 } from "../lib/stellar";
 import { publishOmobaAvatarFromStellar } from "../lib/omobaRegistry";
 
+function parseNumberInput(value: string, fallback = 0) {
+  const parsed = Number(value);
+  return Number.isSafeInteger(parsed) ? parsed : fallback;
+}
+
+function normalizeArenaId(value: string, fallback: string, maxLength: number) {
+  const normalized = value
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9_:-]+/g, "_")
+    .replace(/^_+|_+$/g, "");
+  return (normalized || fallback).slice(0, maxLength);
+}
+
+function parseArenaSkillIds(value: string) {
+  return value
+    .split(",")
+    .map((skill) => normalizeArenaId(skill, "", 40))
+    .filter(Boolean)
+    .slice(0, 8);
+}
+
 export function ReleasePage() {
   const state = useAppState();
   const [releaseIndex, setReleaseIndex] = useState("0");
@@ -23,6 +50,13 @@ export function ReleasePage() {
   const [contributor, setContributor] = useState("");
   const [shareBps, setShareBps] = useState("10000");
   const [avatarData, setAvatarData] = useState("");
+  const [arenaMetadataIpfsHash, setArenaMetadataIpfsHash] = useState(
+    "QmArenaCardMetadataHash"
+  );
+  const [arenaCardKind, setArenaCardKind] = useState<ArenaCardKind>("avatar");
+  const [arenaArchetypeId, setArenaArchetypeId] = useState("sprout_avatar");
+  const [arenaSlotMask, setArenaSlotMask] = useState("3");
+  const [arenaSkillIds, setArenaSkillIds] = useState("moss_skin");
   const [omobaUriIpfsHash, setOmobaUriIpfsHash] = useState(
     "QmOmobaAvatarMetadataHash"
   );
@@ -150,6 +184,56 @@ export function ReleasePage() {
     }
   }
 
+  async function publishArenaAsset() {
+    const client = ensureClient(state);
+    if (!client || !universe || !release || !vault || !arenaMetadataIpfsHash)
+      return;
+    setLoading(true);
+    try {
+      const result = await publishArenaAssetFromStellar({
+        provider: client.provider,
+        universe,
+        release,
+        vault,
+        asset: {
+          metadataIpfsHash: arenaMetadataIpfsHash,
+          cardKind: arenaEnum(arenaCardKind),
+          archetypeId: normalizeArenaId(arenaArchetypeId, "arena_card", 64),
+          slotMask: Math.max(1, parseNumberInput(arenaSlotMask, 3)),
+          skillIds: parseArenaSkillIds(arenaSkillIds),
+        },
+      });
+      state.setAddresses((current) => ({
+        ...current,
+        arenaAsset: result.arenaAsset.toBase58(),
+        arenaStellarLink: result.stellarLink.toBase58(),
+        arenaReleaseLink: result.stellarReleaseLink.toBase58(),
+        arenaReleaseDeployment: result.stellarReleaseDeployment.toBase58(),
+      }));
+      logSignature(state, "Arena asset deployed", result.signature);
+      state.addLog(
+        "info",
+        "Arena registry asset",
+        JSON.stringify(
+          {
+            arenaAssetIndex: result.arenaAssetIndex,
+            arenaAsset: result.arenaAsset.toBase58(),
+            stellarLink: result.stellarLink.toBase58(),
+            stellarReleaseLink: result.stellarReleaseLink.toBase58(),
+            stellarReleaseDeployment:
+              result.stellarReleaseDeployment.toBase58(),
+          },
+          null,
+          2
+        )
+      );
+    } catch (error) {
+      state.addLog("error", "Deploy Arena asset failed", String(error));
+    } finally {
+      setLoading(false);
+    }
+  }
+
   async function publishOmobaAvatar() {
     const client = ensureClient(state);
     if (!client || !universe || !release || !vault || !omobaUriIpfsHash) return;
@@ -256,6 +340,47 @@ export function ReleasePage() {
           />
         </Field>
         <Field
+          label="Arena metadata hash"
+          hint="Stored in solana-arena-registry for this Stellar release."
+        >
+          <input
+            value={arenaMetadataIpfsHash}
+            onChange={(event) => setArenaMetadataIpfsHash(event.target.value)}
+          />
+        </Field>
+        <Field label="Arena card kind">
+          <select
+            value={arenaCardKind}
+            onChange={(event) =>
+              setArenaCardKind(event.target.value as ArenaCardKind)
+            }
+          >
+            <option value="avatar">avatar</option>
+            <option value="modifier">modifier</option>
+          </select>
+        </Field>
+        <Field label="Arena archetype">
+          <input
+            value={arenaArchetypeId}
+            onChange={(event) => setArenaArchetypeId(event.target.value)}
+          />
+        </Field>
+        <Field
+          label="Arena slot mask"
+          hint="Gear slots the skin supports; stats are rolled later by the Arena mint."
+        >
+          <input
+            value={arenaSlotMask}
+            onChange={(event) => setArenaSlotMask(event.target.value)}
+          />
+        </Field>
+        <Field label="Arena skills" hint="Comma-separated skill ids.">
+          <input
+            value={arenaSkillIds}
+            onChange={(event) => setArenaSkillIds(event.target.value)}
+          />
+        </Field>
+        <Field
           label="Omoba metadata hash"
           hint="Stored in solana-omoba-registry for this release."
         >
@@ -305,6 +430,13 @@ export function ReleasePage() {
           onClick={linkAvatarData}
         >
           Link Avatar
+        </button>
+        <button
+          className="secondary"
+          disabled={loading || !release || !vault || !arenaMetadataIpfsHash}
+          onClick={publishArenaAsset}
+        >
+          Deploy Arena
         </button>
         <button
           className="secondary"

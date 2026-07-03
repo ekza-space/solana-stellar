@@ -1,0 +1,2876 @@
+{
+  "address": "D3a99Wj3eLLn4jbXU5rLDbaFT6giQiUbmcPkiyQSM8iZ",
+  "metadata": {
+    "name": "solana_ekza_arena",
+    "version": "0.1.0",
+    "spec": "0.1.0",
+    "description": "Anchor registry for Ekza Arena card assets published from Solana Stellar releases"
+  },
+  "instructions": [
+    {
+      "name": "commit_mint",
+      "docs": [
+        "Commit-reveal mint — step 1: lock a future slot + charge the fee (§12.1)."
+      ],
+      "discriminator": [
+        181,
+        103,
+        14,
+        29,
+        178,
+        21,
+        41,
+        19
+      ],
+      "accounts": [
+        {
+          "name": "registry",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  114,
+                  101,
+                  110,
+                  97,
+                  95,
+                  114,
+                  101,
+                  103,
+                  105,
+                  115,
+                  116,
+                  114,
+                  121
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "mint_commit",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  105,
+                  110,
+                  116,
+                  95,
+                  99,
+                  111,
+                  109,
+                  109,
+                  105,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "minter"
+              },
+              {
+                "kind": "arg",
+                "path": "args.nonce"
+              }
+            ]
+          }
+        },
+        {
+          "name": "minter",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "treasury",
+          "docs": [
+            "`registry.treasury` (enforced in the handler)."
+          ],
+          "writable": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "args",
+          "type": {
+            "defined": {
+              "name": "CommitMintArgs"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "configure_registry",
+      "docs": [
+        "Set the treasury + commit fee for the commit-reveal mint (spec §12.1)."
+      ],
+      "discriminator": [
+        5,
+        33,
+        43,
+        21,
+        25,
+        65,
+        52,
+        55
+      ],
+      "accounts": [
+        {
+          "name": "registry",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  114,
+                  101,
+                  110,
+                  97,
+                  95,
+                  114,
+                  101,
+                  103,
+                  105,
+                  115,
+                  116,
+                  114,
+                  121
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "payer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "args",
+          "type": {
+            "defined": {
+              "name": "ConfigureRegistryArgs"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "create_player_avatar",
+      "docs": [
+        "Create the player's character (one `PlayerAvatar` per wallet)."
+      ],
+      "discriminator": [
+        71,
+        28,
+        193,
+        121,
+        45,
+        35,
+        194,
+        127
+      ],
+      "accounts": [
+        {
+          "name": "player_avatar",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  108,
+                  97,
+                  121,
+                  101,
+                  114,
+                  95,
+                  97,
+                  118,
+                  97,
+                  116,
+                  97,
+                  114,
+                  95,
+                  118,
+                  49
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "owner"
+              }
+            ]
+          }
+        },
+        {
+          "name": "avatar_asset",
+          "docs": [
+            "The Avatar card this character is based on (kind checked in the handler)."
+          ]
+        },
+        {
+          "name": "owner",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "args",
+          "type": {
+            "defined": {
+              "name": "CreatePlayerAvatarArgs"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "customize_avatar",
+      "docs": [
+        "Rename / reskin the character, or swap its base Avatar card."
+      ],
+      "discriminator": [
+        61,
+        64,
+        78,
+        85,
+        188,
+        70,
+        228,
+        176
+      ],
+      "accounts": [
+        {
+          "name": "player_avatar",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  108,
+                  97,
+                  121,
+                  101,
+                  114,
+                  95,
+                  97,
+                  118,
+                  97,
+                  116,
+                  97,
+                  114,
+                  95,
+                  118,
+                  49
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "owner"
+              }
+            ]
+          }
+        },
+        {
+          "name": "new_avatar_asset",
+          "docs": [
+            "Optional replacement Avatar card (kind checked in the handler)."
+          ],
+          "optional": true
+        },
+        {
+          "name": "owner",
+          "signer": true,
+          "relations": [
+            "player_avatar"
+          ]
+        }
+      ],
+      "args": [
+        {
+          "name": "args",
+          "type": {
+            "defined": {
+              "name": "CustomizeAvatarArgs"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "equip_item",
+      "docs": [
+        "Equip an owned item NFT into the slot implied by its base type."
+      ],
+      "discriminator": [
+        38,
+        155,
+        16,
+        165,
+        146,
+        31,
+        4,
+        255
+      ],
+      "accounts": [
+        {
+          "name": "player_avatar",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  108,
+                  97,
+                  121,
+                  101,
+                  114,
+                  95,
+                  97,
+                  118,
+                  97,
+                  116,
+                  97,
+                  114,
+                  95,
+                  118,
+                  49
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "owner"
+              }
+            ]
+          }
+        },
+        {
+          "name": "arena_item",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  114,
+                  101,
+                  110,
+                  97,
+                  95,
+                  105,
+                  116,
+                  101,
+                  109,
+                  95,
+                  118,
+                  49
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              }
+            ]
+          }
+        },
+        {
+          "name": "mint",
+          "docs": [
+            "The NFT mint bound to this item."
+          ],
+          "relations": [
+            "arena_item"
+          ]
+        },
+        {
+          "name": "token_account",
+          "docs": [
+            "Owner's token account — must hold exactly the 1 NFT token."
+          ],
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "owner"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  6,
+                  221,
+                  246,
+                  225,
+                  215,
+                  101,
+                  161,
+                  147,
+                  217,
+                  203,
+                  225,
+                  70,
+                  206,
+                  235,
+                  121,
+                  172,
+                  28,
+                  180,
+                  133,
+                  237,
+                  95,
+                  91,
+                  55,
+                  145,
+                  58,
+                  140,
+                  245,
+                  133,
+                  126,
+                  255,
+                  0,
+                  169
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "owner",
+          "signer": true,
+          "relations": [
+            "player_avatar"
+          ]
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "mint_arena_item",
+      "discriminator": [
+        133,
+        23,
+        252,
+        40,
+        128,
+        237,
+        137,
+        95
+      ],
+      "accounts": [
+        {
+          "name": "registry",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  114,
+                  101,
+                  110,
+                  97,
+                  95,
+                  114,
+                  101,
+                  103,
+                  105,
+                  115,
+                  116,
+                  114,
+                  121
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "mint",
+          "docs": [
+            "The new NFT mint (1 token, 0 decimals). Mint+freeze authority start on the",
+            "payer; the Master Edition CPI then takes them over."
+          ],
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "arena_item",
+          "docs": [
+            "Game stats PDA, seeded by the NFT mint (spec §11.2)."
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  114,
+                  101,
+                  110,
+                  97,
+                  95,
+                  105,
+                  116,
+                  101,
+                  109,
+                  95,
+                  118,
+                  49
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              }
+            ]
+          }
+        },
+        {
+          "name": "minter_token_account",
+          "docs": [
+            "Minter's associated token account — receives the single NFT token."
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "payer"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  6,
+                  221,
+                  246,
+                  225,
+                  215,
+                  101,
+                  161,
+                  147,
+                  217,
+                  203,
+                  225,
+                  70,
+                  206,
+                  235,
+                  121,
+                  172,
+                  28,
+                  180,
+                  133,
+                  237,
+                  95,
+                  91,
+                  55,
+                  145,
+                  58,
+                  140,
+                  245,
+                  133,
+                  126,
+                  255,
+                  0,
+                  169
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "payer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "slot_hashes",
+          "address": "SysvarS1otHashes111111111111111111111111111"
+        },
+        {
+          "name": "metadata_account",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  101,
+                  116,
+                  97,
+                  100,
+                  97,
+                  116,
+                  97
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "token_metadata_program"
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              }
+            ],
+            "program": {
+              "kind": "account",
+              "path": "token_metadata_program"
+            }
+          }
+        },
+        {
+          "name": "master_edition",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  101,
+                  116,
+                  97,
+                  100,
+                  97,
+                  116,
+                  97
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "token_metadata_program"
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  101,
+                  100,
+                  105,
+                  116,
+                  105,
+                  111,
+                  110
+                ]
+              }
+            ],
+            "program": {
+              "kind": "account",
+              "path": "token_metadata_program"
+            }
+          }
+        },
+        {
+          "name": "stellar_program",
+          "optional": true
+        },
+        {
+          "name": "stellar_release",
+          "optional": true
+        },
+        {
+          "name": "stellar_vault",
+          "optional": true
+        },
+        {
+          "name": "token_metadata_program",
+          "address": "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s"
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "associated_token_program",
+          "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "rent",
+          "address": "SysvarRent111111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "args",
+          "type": {
+            "defined": {
+              "name": "MintArenaItemArgs"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "register_arena_asset",
+      "discriminator": [
+        17,
+        250,
+        222,
+        179,
+        147,
+        87,
+        201,
+        241
+      ],
+      "accounts": [
+        {
+          "name": "registry",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  114,
+                  101,
+                  110,
+                  97,
+                  95,
+                  114,
+                  101,
+                  103,
+                  105,
+                  115,
+                  116,
+                  114,
+                  121
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "arena_asset",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  114,
+                  101,
+                  110,
+                  97,
+                  95,
+                  97,
+                  115,
+                  115,
+                  101,
+                  116,
+                  95,
+                  118,
+                  49
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "registry.next_index",
+                "account": "ArenaRegistry"
+              }
+            ]
+          }
+        },
+        {
+          "name": "payer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "args",
+          "type": {
+            "defined": {
+              "name": "RegisterArenaAssetArgs"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "register_arena_asset_from_stellar",
+      "discriminator": [
+        174,
+        47,
+        212,
+        43,
+        119,
+        142,
+        57,
+        144
+      ],
+      "accounts": [
+        {
+          "name": "registry",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  114,
+                  101,
+                  110,
+                  97,
+                  95,
+                  114,
+                  101,
+                  103,
+                  105,
+                  115,
+                  116,
+                  114,
+                  121
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "arena_asset",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  114,
+                  101,
+                  110,
+                  97,
+                  95,
+                  97,
+                  115,
+                  115,
+                  101,
+                  116,
+                  95,
+                  118,
+                  49
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "registry.next_index",
+                "account": "ArenaRegistry"
+              }
+            ]
+          }
+        },
+        {
+          "name": "payer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "stellar_link",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  116,
+                  101,
+                  108,
+                  108,
+                  97,
+                  114,
+                  95,
+                  97,
+                  114,
+                  101,
+                  110,
+                  97,
+                  95,
+                  108,
+                  105,
+                  110,
+                  107
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "arena_asset"
+              }
+            ]
+          }
+        },
+        {
+          "name": "stellar_program"
+        },
+        {
+          "name": "stellar_universe"
+        },
+        {
+          "name": "stellar_release",
+          "writable": true
+        },
+        {
+          "name": "stellar_vault"
+        },
+        {
+          "name": "stellar_release_deployment",
+          "writable": true
+        },
+        {
+          "name": "stellar_release_link",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  116,
+                  101,
+                  108,
+                  108,
+                  97,
+                  114,
+                  95,
+                  114,
+                  101,
+                  108,
+                  101,
+                  97,
+                  115,
+                  101,
+                  95,
+                  108,
+                  105,
+                  110,
+                  107
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "stellar_release"
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "args",
+          "type": {
+            "defined": {
+              "name": "RegisterArenaAssetFromStellarArgs"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "reveal_mint",
+      "docs": [
+        "Commit-reveal mint — step 2: roll from the slot hash + mint (§12.1).",
+        "`nonce` re-derives the `MintCommit` PDA."
+      ],
+      "discriminator": [
+        132,
+        33,
+        197,
+        46,
+        225,
+        238,
+        41,
+        133
+      ],
+      "accounts": [
+        {
+          "name": "registry",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  114,
+                  101,
+                  110,
+                  97,
+                  95,
+                  114,
+                  101,
+                  103,
+                  105,
+                  115,
+                  116,
+                  114,
+                  121
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "mint_commit",
+          "docs": [
+            "The pending commit; closed here, rent returns to the minter."
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  105,
+                  110,
+                  116,
+                  95,
+                  99,
+                  111,
+                  109,
+                  109,
+                  105,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "minter"
+              },
+              {
+                "kind": "arg",
+                "path": "nonce"
+              }
+            ]
+          }
+        },
+        {
+          "name": "mint",
+          "docs": [
+            "The new NFT mint (1 token, 0 decimals)."
+          ],
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "arena_item",
+          "docs": [
+            "Game stats PDA, seeded by the NFT mint (spec §11.2)."
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  114,
+                  101,
+                  110,
+                  97,
+                  95,
+                  105,
+                  116,
+                  101,
+                  109,
+                  95,
+                  118,
+                  49
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              }
+            ]
+          }
+        },
+        {
+          "name": "minter_token_account",
+          "docs": [
+            "Minter's associated token account — receives the single NFT token."
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "minter"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  6,
+                  221,
+                  246,
+                  225,
+                  215,
+                  101,
+                  161,
+                  147,
+                  217,
+                  203,
+                  225,
+                  70,
+                  206,
+                  235,
+                  121,
+                  172,
+                  28,
+                  180,
+                  133,
+                  237,
+                  95,
+                  91,
+                  55,
+                  145,
+                  58,
+                  140,
+                  245,
+                  133,
+                  126,
+                  255,
+                  0,
+                  169
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "minter",
+          "writable": true,
+          "signer": true,
+          "relations": [
+            "mint_commit"
+          ]
+        },
+        {
+          "name": "slot_hashes",
+          "address": "SysvarS1otHashes111111111111111111111111111"
+        },
+        {
+          "name": "metadata_account",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  101,
+                  116,
+                  97,
+                  100,
+                  97,
+                  116,
+                  97
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "token_metadata_program"
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              }
+            ],
+            "program": {
+              "kind": "account",
+              "path": "token_metadata_program"
+            }
+          }
+        },
+        {
+          "name": "master_edition",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  101,
+                  116,
+                  97,
+                  100,
+                  97,
+                  116,
+                  97
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "token_metadata_program"
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  101,
+                  100,
+                  105,
+                  116,
+                  105,
+                  111,
+                  110
+                ]
+              }
+            ],
+            "program": {
+              "kind": "account",
+              "path": "token_metadata_program"
+            }
+          }
+        },
+        {
+          "name": "stellar_program",
+          "optional": true
+        },
+        {
+          "name": "stellar_release",
+          "optional": true
+        },
+        {
+          "name": "stellar_vault",
+          "optional": true
+        },
+        {
+          "name": "token_metadata_program",
+          "address": "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s"
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "associated_token_program",
+          "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "rent",
+          "address": "SysvarRent111111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "nonce",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "scrap_arena_item",
+      "discriminator": [
+        238,
+        77,
+        16,
+        26,
+        64,
+        50,
+        188,
+        230
+      ],
+      "accounts": [
+        {
+          "name": "arena_item",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  114,
+                  101,
+                  110,
+                  97,
+                  95,
+                  105,
+                  116,
+                  101,
+                  109,
+                  95,
+                  118,
+                  49
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              }
+            ]
+          }
+        },
+        {
+          "name": "mint",
+          "docs": [
+            "The NFT mint bound to this item."
+          ],
+          "writable": true,
+          "relations": [
+            "arena_item"
+          ]
+        },
+        {
+          "name": "token_account",
+          "docs": [
+            "Owner's token account — must hold exactly the 1 NFT token."
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "owner"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  6,
+                  221,
+                  246,
+                  225,
+                  215,
+                  101,
+                  161,
+                  147,
+                  217,
+                  203,
+                  225,
+                  70,
+                  206,
+                  235,
+                  121,
+                  172,
+                  28,
+                  180,
+                  133,
+                  237,
+                  95,
+                  91,
+                  55,
+                  145,
+                  58,
+                  140,
+                  245,
+                  133,
+                  126,
+                  255,
+                  0,
+                  169
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "metadata_account",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  101,
+                  116,
+                  97,
+                  100,
+                  97,
+                  116,
+                  97
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "token_metadata_program"
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              }
+            ],
+            "program": {
+              "kind": "account",
+              "path": "token_metadata_program"
+            }
+          }
+        },
+        {
+          "name": "master_edition",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  101,
+                  116,
+                  97,
+                  100,
+                  97,
+                  116,
+                  97
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "token_metadata_program"
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  101,
+                  100,
+                  105,
+                  116,
+                  105,
+                  111,
+                  110
+                ]
+              }
+            ],
+            "program": {
+              "kind": "account",
+              "path": "token_metadata_program"
+            }
+          }
+        },
+        {
+          "name": "owner",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "token_metadata_program",
+          "address": "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s"
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "unequip_item",
+      "docs": [
+        "Clear one equip slot (`slot` = ArenaBaseType slot index 0..3)."
+      ],
+      "discriminator": [
+        96,
+        192,
+        232,
+        54,
+        127,
+        191,
+        236,
+        128
+      ],
+      "accounts": [
+        {
+          "name": "player_avatar",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  108,
+                  97,
+                  121,
+                  101,
+                  114,
+                  95,
+                  97,
+                  118,
+                  97,
+                  116,
+                  97,
+                  114,
+                  95,
+                  118,
+                  49
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "owner"
+              }
+            ]
+          }
+        },
+        {
+          "name": "owner",
+          "signer": true,
+          "relations": [
+            "player_avatar"
+          ]
+        }
+      ],
+      "args": [
+        {
+          "name": "slot",
+          "type": "u8"
+        }
+      ]
+    }
+  ],
+  "accounts": [
+    {
+      "name": "ArenaAssetData",
+      "discriminator": [
+        151,
+        133,
+        77,
+        71,
+        39,
+        27,
+        173,
+        254
+      ]
+    },
+    {
+      "name": "ArenaItem",
+      "discriminator": [
+        26,
+        179,
+        30,
+        94,
+        241,
+        186,
+        168,
+        16
+      ]
+    },
+    {
+      "name": "ArenaRegistry",
+      "discriminator": [
+        45,
+        168,
+        242,
+        224,
+        23,
+        124,
+        214,
+        30
+      ]
+    },
+    {
+      "name": "MintCommit",
+      "discriminator": [
+        88,
+        149,
+        170,
+        63,
+        251,
+        214,
+        128,
+        176
+      ]
+    },
+    {
+      "name": "PlayerAvatar",
+      "discriminator": [
+        107,
+        241,
+        210,
+        82,
+        34,
+        167,
+        161,
+        229
+      ]
+    },
+    {
+      "name": "StellarArenaAssetLink",
+      "discriminator": [
+        26,
+        109,
+        247,
+        114,
+        58,
+        150,
+        99,
+        62
+      ]
+    },
+    {
+      "name": "StellarReleaseLink",
+      "discriminator": [
+        94,
+        52,
+        249,
+        193,
+        35,
+        188,
+        145,
+        125
+      ]
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "InvalidMetadataLength",
+      "msg": "Invalid metadata URI or IPFS hash length."
+    },
+    {
+      "code": 6001,
+      "name": "InvalidArchetypeId",
+      "msg": "Invalid Arena archetype id."
+    },
+    {
+      "code": 6002,
+      "name": "InvalidSkillIds",
+      "msg": "Invalid Arena skill id list."
+    },
+    {
+      "code": 6003,
+      "name": "InvalidSlotMask",
+      "msg": "Invalid Arena slot mask."
+    },
+    {
+      "code": 6004,
+      "name": "InvalidStats",
+      "msg": "Invalid Arena stats for this card kind."
+    },
+    {
+      "code": 6005,
+      "name": "NumericalOverflow",
+      "msg": "Numerical overflow occurred."
+    },
+    {
+      "code": 6006,
+      "name": "Unauthorized",
+      "msg": "Unauthorized action."
+    },
+    {
+      "code": 6007,
+      "name": "InvalidStellarProgram",
+      "msg": "Invalid Stellar program."
+    },
+    {
+      "code": 6008,
+      "name": "InvalidStellarUniverse",
+      "msg": "Invalid Stellar universe account."
+    },
+    {
+      "code": 6009,
+      "name": "InvalidStellarRelease",
+      "msg": "Invalid Stellar release account."
+    },
+    {
+      "code": 6010,
+      "name": "InvalidStellarVault",
+      "msg": "Invalid Stellar vault account."
+    },
+    {
+      "code": 6011,
+      "name": "InvalidSkin",
+      "msg": "Invalid item skin reference."
+    },
+    {
+      "code": 6012,
+      "name": "MissingStellarSkinAccounts",
+      "msg": "A Stellar skin was requested but the Stellar accounts were not supplied."
+    },
+    {
+      "code": 6013,
+      "name": "InvalidSlotHashes",
+      "msg": "Invalid SlotHashes sysvar account."
+    },
+    {
+      "code": 6014,
+      "name": "InvalidNftMetadata",
+      "msg": "Invalid NFT metadata (name/symbol/uri length)."
+    },
+    {
+      "code": 6015,
+      "name": "NotNftHolder",
+      "msg": "The signer is not the current holder of the item NFT."
+    },
+    {
+      "code": 6016,
+      "name": "RevealTooEarly",
+      "msg": "Reveal attempted before the committed target slot has passed."
+    },
+    {
+      "code": 6017,
+      "name": "SlotHashNotFound",
+      "msg": "The committed target slot's hash is no longer in the SlotHashes sysvar."
+    },
+    {
+      "code": 6018,
+      "name": "RegistryNotConfigured",
+      "msg": "The registry has not been configured with a treasury / commit fee."
+    },
+    {
+      "code": 6019,
+      "name": "InvalidTreasury",
+      "msg": "The supplied treasury account does not match the configured treasury."
+    },
+    {
+      "code": 6020,
+      "name": "InvalidAvatarAsset",
+      "msg": "The referenced arena asset is not an Avatar card."
+    },
+    {
+      "code": 6021,
+      "name": "InvalidAvatarName",
+      "msg": "Invalid avatar name (empty or too long)."
+    },
+    {
+      "code": 6022,
+      "name": "InvalidEquipSlot",
+      "msg": "The avatar does not support this equip slot."
+    }
+  ],
+  "types": [
+    {
+      "name": "ArenaAffix",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "kind",
+            "type": "u8"
+          },
+          {
+            "name": "value",
+            "type": "i16"
+          },
+          {
+            "name": "element",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ArenaAssetData",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "metadata_ipfs_hash",
+            "type": "string"
+          },
+          {
+            "name": "creator",
+            "type": "pubkey"
+          },
+          {
+            "name": "index",
+            "type": "u64"
+          },
+          {
+            "name": "card_kind",
+            "type": {
+              "defined": {
+                "name": "ArenaCardKind"
+              }
+            }
+          },
+          {
+            "name": "archetype_id",
+            "type": "string"
+          },
+          {
+            "name": "base_stats",
+            "type": {
+              "defined": {
+                "name": "ArenaStats"
+              }
+            }
+          },
+          {
+            "name": "stat_delta",
+            "type": {
+              "defined": {
+                "name": "ArenaStats"
+              }
+            }
+          },
+          {
+            "name": "slot_mask",
+            "type": "u8"
+          },
+          {
+            "name": "rarity",
+            "type": {
+              "defined": {
+                "name": "ArenaRarity"
+              }
+            }
+          },
+          {
+            "name": "element",
+            "type": {
+              "defined": {
+                "name": "ArenaElement"
+              }
+            }
+          },
+          {
+            "name": "skill_ids",
+            "type": {
+              "vec": "string"
+            }
+          },
+          {
+            "name": "skin_ref",
+            "docs": [
+              "Cosmetic skin source (spec §2/§8b). Stellar-bridged assets store",
+              "`StellarAsset(<asset pubkey>)`; direct/manual cards default to a builtin."
+            ],
+            "type": {
+              "defined": {
+                "name": "ItemSkin"
+              }
+            }
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ArenaBaseType",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Weapon"
+          },
+          {
+            "name": "Head"
+          },
+          {
+            "name": "Armor"
+          },
+          {
+            "name": "Charm"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ArenaCardKind",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Avatar"
+          },
+          {
+            "name": "Modifier"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ArenaElement",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "None"
+          },
+          {
+            "name": "Fire"
+          },
+          {
+            "name": "Ice"
+          },
+          {
+            "name": "Poison"
+          },
+          {
+            "name": "Holy"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ArenaItem",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "seed",
+            "type": "u64"
+          },
+          {
+            "name": "base_type",
+            "type": {
+              "defined": {
+                "name": "ArenaBaseType"
+              }
+            }
+          },
+          {
+            "name": "tier",
+            "type": "u8"
+          },
+          {
+            "name": "rarity",
+            "type": {
+              "defined": {
+                "name": "ArenaRarity"
+              }
+            }
+          },
+          {
+            "name": "affixes",
+            "type": {
+              "vec": {
+                "defined": {
+                  "name": "ArenaAffix"
+                }
+              }
+            }
+          },
+          {
+            "name": "skin_ref",
+            "type": {
+              "defined": {
+                "name": "ItemSkin"
+              }
+            }
+          },
+          {
+            "name": "minter",
+            "docs": [
+              "Original creator of the item. NOT the owner — ownership is the current",
+              "holder of the `mint` NFT token (spec §11.2). Gameplay reads must resolve",
+              "the owner from the token holder, never from `minter`."
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "mint",
+            "docs": [
+              "The SPL mint of the tradeable NFT this item is bound to (1:1). The PDA is",
+              "seeded by this mint (spec §11.2)."
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "index",
+            "type": "u64"
+          },
+          {
+            "name": "enhance_level",
+            "docs": [
+              "Forward-compat (spec §12.3): sharpening level. Defaulted 0 at mint; no",
+              "instruction mutates it yet (v5 `sharpen_item`)."
+            ],
+            "type": "u8"
+          },
+          {
+            "name": "sockets",
+            "docs": [
+              "Forward-compat (spec §12.3): gem sockets. Defaulted empty at mint, space",
+              "reserved for MAX_SOCKETS; no instruction mutates it yet (v5 `socket_gem`)."
+            ],
+            "type": {
+              "vec": {
+                "defined": {
+                  "name": "Socket"
+                }
+              }
+            }
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ArenaRarity",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Common"
+          },
+          {
+            "name": "Rare"
+          },
+          {
+            "name": "Legendary"
+          },
+          {
+            "name": "Unique"
+          },
+          {
+            "name": "Epic"
+          },
+          {
+            "name": "Mythic"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ArenaRegistry",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "next_index",
+            "type": "u64"
+          },
+          {
+            "name": "treasury",
+            "docs": [
+              "Destination of the non-refundable commit fee (spec §12.1). Set by",
+              "`configure_registry`; default (all-zero) until configured."
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "commit_fee_lamports",
+            "docs": [
+              "Non-refundable fee charged at `commit_mint`, in lamports (spec §12.1)."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ArenaStats",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "hp",
+            "type": "i16"
+          },
+          {
+            "name": "attack",
+            "type": "i16"
+          },
+          {
+            "name": "armor",
+            "type": "i16"
+          },
+          {
+            "name": "speed",
+            "type": "i16"
+          }
+        ]
+      }
+    },
+    {
+      "name": "CommitMintArgs",
+      "docs": [
+        "Args for `commit_mint` (spec §12.1). The roll is NOT performed here — only",
+        "the intent + future-slot lock is persisted; `reveal_mint` rolls from the",
+        "then-unknown slot hash."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "nonce",
+            "docs": [
+              "Caller-chosen nonce, part of the `MintCommit` PDA seeds (lets one minter",
+              "have many concurrent commits)."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "base_type",
+            "type": {
+              "defined": {
+                "name": "ArenaBaseType"
+              }
+            }
+          },
+          {
+            "name": "skin",
+            "type": {
+              "defined": {
+                "name": "MintSkinArg"
+              }
+            }
+          },
+          {
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "name": "symbol",
+            "type": "string"
+          },
+          {
+            "name": "uri",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ConfigureRegistryArgs",
+      "docs": [
+        "Args for `configure_registry` — set the treasury + commit fee (spec §12.1)."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "treasury",
+            "type": "pubkey"
+          },
+          {
+            "name": "commit_fee_lamports",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "CreatePlayerAvatarArgs",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "name",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "CustomizeAvatarArgs",
+      "docs": [
+        "Args for `customize_avatar`. All fields optional — only supplied parts",
+        "change. Passing a new `avatar_asset` account (see context) swaps the base",
+        "character and clears all equipped slots."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "name",
+            "type": {
+              "option": "string"
+            }
+          },
+          {
+            "name": "skin",
+            "docs": [
+              "Cosmetic skin override. Only `Builtin`/`Ipfs` are accepted here (Stellar",
+              "skins enter via the avatar card's own `skin_ref`)."
+            ],
+            "type": {
+              "option": {
+                "defined": {
+                  "name": "MintSkinArg"
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "ItemSkin",
+      "docs": [
+        "Skin source — purely cosmetic, carries zero balance impact (spec §2)."
+      ],
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Ipfs",
+            "fields": [
+              "string"
+            ]
+          },
+          {
+            "name": "StellarAsset",
+            "fields": [
+              "pubkey"
+            ]
+          },
+          {
+            "name": "Builtin",
+            "fields": [
+              "u8"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "MintArenaItemArgs",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "base_type",
+            "type": {
+              "defined": {
+                "name": "ArenaBaseType"
+              }
+            }
+          },
+          {
+            "name": "skin",
+            "type": {
+              "defined": {
+                "name": "MintSkinArg"
+              }
+            }
+          },
+          {
+            "name": "name",
+            "docs": [
+              "NFT Metadata `name` (e.g. \"Ekza Arena Item #12\"). Client builds it."
+            ],
+            "type": "string"
+          },
+          {
+            "name": "symbol",
+            "docs": [
+              "NFT Metadata `symbol` (e.g. \"EKZAITEM\")."
+            ],
+            "type": "string"
+          },
+          {
+            "name": "uri",
+            "docs": [
+              "Off-chain metadata JSON URI (skin image/animation + stats mirror, spec",
+              "§11.2). Client uploads to IPFS and passes the gateway/ipfs URI."
+            ],
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "MintCommit",
+      "docs": [
+        "A pending mint, committed to a FUTURE slot (spec §12.1). `reveal_mint` reads",
+        "the hash of `target_slot` (unknown at commit time) to derive the seed, making",
+        "the roll unpredictable and thus revert-grind resistant."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "minter",
+            "type": "pubkey"
+          },
+          {
+            "name": "nonce",
+            "type": "u64"
+          },
+          {
+            "name": "target_slot",
+            "docs": [
+              "Slot whose hash seeds the roll; reveal must wait until `Clock::slot` has",
+              "passed it AND the hash is still in the SlotHashes sysvar (~512 slots)."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "base_type",
+            "type": {
+              "defined": {
+                "name": "ArenaBaseType"
+              }
+            }
+          },
+          {
+            "name": "skin",
+            "type": {
+              "defined": {
+                "name": "MintSkinArg"
+              }
+            }
+          },
+          {
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "name": "symbol",
+            "type": "string"
+          },
+          {
+            "name": "uri",
+            "type": "string"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "MintSkinArg",
+      "docs": [
+        "Requested skin source for a minted item (cosmetic only, spec §2)."
+      ],
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Builtin",
+            "fields": [
+              "u8"
+            ]
+          },
+          {
+            "name": "Ipfs",
+            "fields": [
+              "string"
+            ]
+          },
+          {
+            "name": "Stellar"
+          }
+        ]
+      }
+    },
+    {
+      "name": "PlayerAvatar",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "owner",
+            "type": "pubkey"
+          },
+          {
+            "name": "avatar_asset",
+            "docs": [
+              "The `ArenaAssetData` Avatar card this character is based on."
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "name",
+            "docs": [
+              "Player-chosen display name (cosmetic only)."
+            ],
+            "type": "string"
+          },
+          {
+            "name": "skin_ref",
+            "docs": [
+              "Cosmetic skin override; defaults to the avatar card's `skin_ref`."
+            ],
+            "type": {
+              "defined": {
+                "name": "ItemSkin"
+              }
+            }
+          },
+          {
+            "name": "slot_mask",
+            "docs": [
+              "Copy of the avatar card's `slot_mask` at create/swap time — which equip",
+              "slots this character supports (bit N = `ArenaBaseType::slot_index()` N)."
+            ],
+            "type": "u8"
+          },
+          {
+            "name": "equipped",
+            "docs": [
+              "Equipped item NFT mints, indexed by `ArenaBaseType::slot_index()`."
+            ],
+            "type": {
+              "array": [
+                "pubkey",
+                4
+              ]
+            }
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "RegisterArenaAssetArgs",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "metadata_ipfs_hash",
+            "type": "string"
+          },
+          {
+            "name": "card_kind",
+            "type": {
+              "defined": {
+                "name": "ArenaCardKind"
+              }
+            }
+          },
+          {
+            "name": "archetype_id",
+            "type": "string"
+          },
+          {
+            "name": "base_stats",
+            "type": {
+              "defined": {
+                "name": "ArenaStats"
+              }
+            }
+          },
+          {
+            "name": "stat_delta",
+            "type": {
+              "defined": {
+                "name": "ArenaStats"
+              }
+            }
+          },
+          {
+            "name": "slot_mask",
+            "type": "u8"
+          },
+          {
+            "name": "rarity",
+            "type": {
+              "defined": {
+                "name": "ArenaRarity"
+              }
+            }
+          },
+          {
+            "name": "element",
+            "type": {
+              "defined": {
+                "name": "ArenaElement"
+              }
+            }
+          },
+          {
+            "name": "skill_ids",
+            "type": {
+              "vec": "string"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "RegisterArenaAssetFromStellarArgs",
+      "docs": [
+        "Skin-only args for `register_arena_asset_from_stellar` (spec §2/§7/§8b).",
+        "",
+        "A Stellar publish enters Arena as a SKIN ONLY — it carries zero balance.",
+        "Deliberately drops `base_stats/stat_delta/rarity/element` so the Stellar",
+        "caller cannot inject stats; balance comes from a later `mint_arena_item`",
+        "roll. Only the cosmetic/identity fields cross the bridge."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "metadata_ipfs_hash",
+            "type": "string"
+          },
+          {
+            "name": "card_kind",
+            "type": {
+              "defined": {
+                "name": "ArenaCardKind"
+              }
+            }
+          },
+          {
+            "name": "archetype_id",
+            "type": "string"
+          },
+          {
+            "name": "slot_mask",
+            "type": "u8"
+          },
+          {
+            "name": "skill_ids",
+            "type": {
+              "vec": "string"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "Socket",
+      "docs": [
+        "Forward-compat gem socket (spec §12.3/§4 of rng-economy-upgrades). Reserved",
+        "now (defaulted empty at mint); the `socket_gem` instruction lands in v5."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "kind",
+            "type": "u8"
+          },
+          {
+            "name": "value",
+            "type": "i16"
+          }
+        ]
+      }
+    },
+    {
+      "name": "StellarArenaAssetLink",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "arena_asset",
+            "type": "pubkey"
+          },
+          {
+            "name": "stellar_program",
+            "type": "pubkey"
+          },
+          {
+            "name": "universe",
+            "type": "pubkey"
+          },
+          {
+            "name": "asset",
+            "type": "pubkey"
+          },
+          {
+            "name": "release",
+            "type": "pubkey"
+          },
+          {
+            "name": "vault",
+            "type": "pubkey"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "StellarReleaseLink",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "release",
+            "type": "pubkey"
+          },
+          {
+            "name": "stellar_program",
+            "type": "pubkey"
+          },
+          {
+            "name": "universe",
+            "type": "pubkey"
+          },
+          {
+            "name": "asset",
+            "type": "pubkey"
+          },
+          {
+            "name": "vault",
+            "type": "pubkey"
+          },
+          {
+            "name": "arena_asset",
+            "type": "pubkey"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    }
+  ],
+  "constants": [
+    {
+      "name": "ARENA_ASSET_SEED",
+      "type": "bytes",
+      "value": "[97, 114, 101, 110, 97, 95, 97, 115, 115, 101, 116, 95, 118, 49]"
+    },
+    {
+      "name": "ARENA_ITEM_SEED",
+      "type": "bytes",
+      "value": "[97, 114, 101, 110, 97, 95, 105, 116, 101, 109, 95, 118, 49]"
+    },
+    {
+      "name": "MINT_COMMIT_SEED",
+      "type": "bytes",
+      "value": "[109, 105, 110, 116, 95, 99, 111, 109, 109, 105, 116]"
+    },
+    {
+      "name": "PLAYER_AVATAR_SEED",
+      "type": "bytes",
+      "value": "[112, 108, 97, 121, 101, 114, 95, 97, 118, 97, 116, 97, 114, 95, 118, 49]"
+    },
+    {
+      "name": "REGISTRY_SEED",
+      "type": "bytes",
+      "value": "[97, 114, 101, 110, 97, 95, 114, 101, 103, 105, 115, 116, 114, 121]"
+    },
+    {
+      "name": "STELLAR_LINK_SEED",
+      "type": "bytes",
+      "value": "[115, 116, 101, 108, 108, 97, 114, 95, 97, 114, 101, 110, 97, 95, 108, 105, 110, 107]"
+    },
+    {
+      "name": "STELLAR_RELEASE_LINK_SEED",
+      "type": "bytes",
+      "value": "[115, 116, 101, 108, 108, 97, 114, 95, 114, 101, 108, 101, 97, 115, 101, 95, 108, 105, 110, 107]"
+    }
+  ]
+}
