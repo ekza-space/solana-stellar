@@ -34,8 +34,10 @@ function parseArgs(argv) {
     endpoint: DEFAULT_ENDPOINT,
     metadataBaseUrl: "http://127.0.0.1:8787",
     ipfsApi: "http://127.0.0.1:5001/api/v0/add",
+    ownerKeypair: null,
     newUniverse: false,
     dryRun: false,
+    printManifest: false,
     airdropSol: 10,
   };
 
@@ -60,12 +62,17 @@ function parseArgs(argv) {
     } else if (arg === "--airdrop-sol" && next) {
       args.airdropSol = Number(next);
       index += 1;
+    } else if (arg === "--owner-keypair" && next) {
+      args.ownerKeypair = path.resolve(next);
+      index += 1;
     } else if (arg === "--skip-airdrop") {
       args.airdropSol = 0;
     } else if (arg === "--new-universe") {
       args.newUniverse = true;
     } else if (arg === "--dry-run") {
       args.dryRun = true;
+    } else if (arg === "--print-manifest") {
+      args.printManifest = true;
     } else if (arg === "--help" || arg === "-h") {
       printHelpAndExit();
     } else {
@@ -82,7 +89,7 @@ function parseArgs(argv) {
 
 function printHelpAndExit() {
   console.log(`Usage:
-  node scripts/deploy-wotori-universe-localnet.js [--folder path] [--dump-dir path] [--endpoint http://127.0.0.1:8899] [--metadata-base-url http://127.0.0.1:8787] [--new-universe] [--dry-run]
+  node scripts/deploy-wotori-universe-localnet.js [--folder path] [--dump-dir path] [--endpoint http://127.0.0.1:8899] [--metadata-base-url http://127.0.0.1:8787] [--owner-keypair path] [--new-universe] [--dry-run] [--print-manifest]
 
 Creates or reuses a Wotori Studio universe owner keypair under <folder>/_
 and maps the scraped Archway Stellar universe dump into Solana Stellar:
@@ -159,7 +166,9 @@ function pointerForFile(folder, file, metadataBaseUrl) {
 // identical whether the bytes live in local Kubo or Pinata, so the same
 // on-chain record resolves through any gateway.
 function ipfsAdd(filePath, ipfsApi) {
-  const url = `${ipfsApi}${ipfsApi.includes("?") ? "&" : "?"}cid-version=0&pin=true`;
+  const url = `${ipfsApi}${
+    ipfsApi.includes("?") ? "&" : "?"
+  }cid-version=0&pin=true`;
   const out = execFileSync(
     "curl",
     ["-s", "-X", "POST", "-F", `file=@${filePath}`, url],
@@ -1156,7 +1165,11 @@ async function main() {
 
   const serviceDir = path.join(args.folder, SERVICE_DIR_NAME);
   const metadataDir = path.join(serviceDir, "metadata");
-  const keypairPath = path.join(serviceDir, "universe-owner-keypair.json");
+  const keypairPath =
+    args.ownerKeypair || path.join(serviceDir, "universe-owner-keypair.json");
+  if (args.ownerKeypair && !fs.existsSync(keypairPath)) {
+    throw new Error(`Owner keypair does not exist: ${keypairPath}`);
+  }
   const manifestPath = path.join(serviceDir, "deployment-manifest.json");
   const previousManifest = args.newUniverse ? null : loadManifest(manifestPath);
 
@@ -1200,6 +1213,50 @@ async function main() {
   const { keypair: owner, created } = loadOrCreateKeypair(keypairPath);
   const connection = new Connection(args.endpoint, "confirmed");
   await assertProgramDeployed(connection);
+  const genesisHash = await connection.getGenesisHash();
+  if (previousManifest) {
+    if (
+      previousManifest.programId &&
+      previousManifest.programId !== PROGRAM_ID.toBase58()
+    ) {
+      throw new Error(
+        `Deployment manifest program ${
+          previousManifest.programId
+        } does not match ${PROGRAM_ID.toBase58()}. ` +
+          "Use --new-universe for a fresh deployment."
+      );
+    }
+    if (
+      previousManifest.genesisHash &&
+      previousManifest.genesisHash !== genesisHash
+    ) {
+      throw new Error(
+        `Deployment manifest belongs to genesis ${previousManifest.genesisHash}, current cluster is ${genesisHash}. ` +
+          "Use --new-universe for a fresh deployment."
+      );
+    }
+    if (!previousManifest.universe) {
+      throw new Error(
+        "Deployment manifest has no universe address. Use --new-universe for a fresh deployment."
+      );
+    }
+    const previousUniverse = new anchor.web3.PublicKey(
+      previousManifest.universe
+    );
+    const previousUniverseInfo = await connection.getAccountInfo(
+      previousUniverse,
+      "confirmed"
+    );
+    if (
+      !previousUniverseInfo ||
+      !previousUniverseInfo.owner.equals(PROGRAM_ID)
+    ) {
+      throw new Error(
+        `Deployment manifest universe ${previousUniverse.toBase58()} is not owned by ${PROGRAM_ID.toBase58()} on the current cluster. ` +
+          "Use --new-universe for a fresh deployment."
+      );
+    }
+  }
   const airdrop = await confirmAirdrop(
     connection,
     owner.publicKey,
@@ -1223,8 +1280,11 @@ async function main() {
     }));
   manifest.endpoint = args.endpoint;
   manifest.programId = PROGRAM_ID.toBase58();
+  manifest.genesisHash = genesisHash;
   manifest.owner = owner.publicKey.toBase58();
-  manifest.ownerKeypair = path.relative(args.folder, keypairPath);
+  manifest.ownerKeypair = args.ownerKeypair
+    ? "external"
+    : path.relative(args.folder, keypairPath);
   manifest.ownerKeypairCreated = created;
   manifest.ownerAirdrop = airdrop;
   manifest.source = "archway-stellar-dump";
@@ -1328,7 +1388,9 @@ async function main() {
   };
   writeDeploymentManifest(manifestPath, manifest);
 
-  console.log(JSON.stringify(manifest, null, 2));
+  if (args.printManifest) {
+    console.log(JSON.stringify(manifest, null, 2));
+  }
   console.log(
     `\nSeeded Wotori universe ${manifest.universe}: ${manifest.summary.entities} entities, ${manifest.summary.assets} assets.`
   );
