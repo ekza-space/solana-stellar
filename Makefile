@@ -5,7 +5,7 @@ ALLOW_MAINNET ?= 0
 ALLOW_REMOTE_SEED ?= 0
 WALLET ?= $(HOME)/.config/solana/id.json
 SOLANA_AVATARS_DIR ?= $(CURDIR)/../solana-avatars
-SOLANA_OMOBA_REGISTRY_DIR ?= $(CURDIR)/../solana-omoba-registry
+SOLANA_OMOBA_REGISTRY_DIR ?= $(CURDIR)/../_legacy/solana-omoba-registry
 DOWNSTREAM_REGISTRY_PROJECTS ?= avatar omoba
 
 LOCALNET_URL ?= http://127.0.0.1:8899
@@ -109,7 +109,7 @@ help:
 		"  make deploy-wotori-localnet        Deploy program + seed a fresh Wotori Studio universe" \
 		"  make deploy-local-registry-programs Deploy configured downstream registries to localnet" \
 		"  make deploy-local-avatar-programs   Deploy solana-avatars + avatar minter to localnet (requires sibling ../solana-avatars repo)" \
-		"  make deploy-local-omoba-programs    Deploy solana-omoba-registry to localnet (requires sibling ../solana-omoba-registry repo)" \
+		"  make deploy-local-omoba-programs    Deploy solana-omoba-registry to localnet (requires ../_legacy/solana-omoba-registry repo)" \
 		"" \
 		"Seeder:" \
 		"  make seed-random-models            Append random models to manifest universe" \

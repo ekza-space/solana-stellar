@@ -87,7 +87,7 @@ make deploy-local-omoba-programs
 
 `DOWNSTREAM_REGISTRY_PROJECTS` stores the short local registry slugs used by the
 bulk target. It defaults to `avatar omoba` and expects sibling repos at
-`../solana-avatars` and `../solana-omoba-registry`.
+`../solana-avatars` and `../_legacy/solana-omoba-registry`.
 
 ## TypeScript SDK
 
